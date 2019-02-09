@@ -33,7 +33,7 @@ public class PropertyListFragment extends Fragment {
                              Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         view = inflater.inflate(R.layout.fragment_property_list, null);
-        fillPropertyList();
+        testFillPropertyList();
         adapter = new PropertyListAdapter(context, propertyItems);
         ListView propertyListView = (ListView) view.findViewById(R.id.propertyListView);
         propertyListView.setAdapter(adapter);
@@ -55,9 +55,9 @@ public class PropertyListFragment extends Fragment {
         nav.setSelectedItemId(R.id.navigation_property_list);
     }
 
-    void fillPropertyList() {
-        for (int i = 0; i < 5; i++) {
-            propertyItems.add(new PropertyItem("Объект " + i, "Описание", "Адрес", 100000));
+    void testFillPropertyList() {
+        for (int i = 0; i < 10; i++) {
+            propertyItems.add(new PropertyItem("Объект " + i, "Описание", "Адрес", 100000 * i));
         }
     }
 }

@@ -48,7 +48,7 @@ public class PropertyListAdapter extends BaseAdapter {
 
         ((TextView) view.findViewById(R.id.item_property_list_view_title)).setText(item.Title);
         ((TextView) view.findViewById(R.id.item_property_list_view_address)).setText(item.Address);
-        ((TextView) view.findViewById(R.id.item_property_list_view_price)).setText(Long.toString(item.Price));
+        ((TextView) view.findViewById(R.id.item_property_list_view_price)).setText(Utils.setPriceConvenientFormat(item.Price) + " \u20BD");
 
         return view;
     }
