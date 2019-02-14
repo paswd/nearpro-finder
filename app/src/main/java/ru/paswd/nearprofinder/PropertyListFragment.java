@@ -56,7 +56,8 @@ public class PropertyListFragment extends Fragment {
     }
 
     void testFillPropertyList() {
-        for (int i = 0; i < 10; i++) {
+        propertyItems.clear();
+        for (int i = 0; i < 11; i++) {
             propertyItems.add(new PropertyItem("Объект " + i, "Описание", "Адрес", 100000 * i));
         }
     }

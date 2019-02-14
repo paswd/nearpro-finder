@@ -25,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
             fTrans.replace(R.id.fragmentContainer, propertyListFragment);
             fTrans.addToBackStack(null);
             fTrans.commit();
+            setTitle(R.string.title_property_list);
         }
     }
 
@@ -34,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
             fTrans.replace(R.id.fragmentContainer, filterFragment);
             fTrans.addToBackStack(null);
             fTrans.commit();
+            setTitle(R.string.title_filter);
         }
     }
 
@@ -43,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
             fTrans.replace(R.id.fragmentContainer, settingsFragment);
             fTrans.addToBackStack(null);
             fTrans.commit();
+            setTitle(R.string.title_settings);
         }
     }
 
