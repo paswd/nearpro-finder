@@ -14,12 +14,12 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class PropertyListFragment extends Fragment {
-    Context context;
-    ArrayList<PropertyItem> propertyItems = new ArrayList<>();
-    PropertyListAdapter adapter;
-    View view;
-    BottomNavigationView navigation;
-    MainActivity activity;
+    private Context context;
+    private ArrayList<PropertyItem> propertyItems = new ArrayList<>();
+    private PropertyListAdapter adapter;
+    private View view;
+    private BottomNavigationView navigation;
+    private MainActivity activity;
 
     private BottomNavigationView nav;
 
@@ -46,7 +46,7 @@ public class PropertyListFragment extends Fragment {
         propertyListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                activity.setViewPropertyItem();
+                activity.setViewPropertyItem(true);
             }
         });
 
@@ -64,7 +64,8 @@ public class PropertyListFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        nav.setSelectedItemId(R.id.navigation_property_list);
+        //nav.setSelectedItemId(R.id.navigation_property_list);
+        nav.getMenu().getItem(NPF.MENU_ITEM_PROPERTY_LIST).setChecked(true);
     }
 
     void testFillPropertyList() {

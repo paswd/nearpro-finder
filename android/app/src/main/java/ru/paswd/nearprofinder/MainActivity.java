@@ -20,44 +20,52 @@ public class MainActivity extends AppCompatActivity {
 
     private BottomNavigationView navigation;
 
-    public void setViewPropertyList() {
+    public void setViewPropertyList(boolean addToStack) {
         if (fragmentStatus != NPF.FRAGMENT_PROPERTY_LIST) {
             fTrans = getFragmentManager().beginTransaction();
             fTrans.replace(R.id.fragmentContainer, propertyListFragment);
-            fTrans.addToBackStack(null);
+            if (addToStack) {
+                fTrans.addToBackStack(null);
+            }
             fTrans.commit();
             setTitle(R.string.title_property_list);
             fragmentStatus = NPF.FRAGMENT_PROPERTY_LIST;
         }
     }
 
-    public void setViewPropertyItem() {
+    public void setViewPropertyItem(boolean addToStack) {
         if (fragmentStatus != NPF.FRAGMENT_PROPERTY_ITEM) {
             fTrans = getFragmentManager().beginTransaction();
             fTrans.replace(R.id.fragmentContainer, propertyItemFragment);
-            fTrans.addToBackStack(null);
+            if (addToStack) {
+                fTrans.addToBackStack(null);
+            }
             fTrans.commit();
             setTitle("Объект");
             fragmentStatus = NPF.FRAGMENT_PROPERTY_ITEM;
         }
     }
 
-    public void setViewFilter() {
+    public void setViewFilter(boolean addToStack) {
         if (fragmentStatus != NPF.FRAGMENT_FILTER) {
             fTrans = getFragmentManager().beginTransaction();
             fTrans.replace(R.id.fragmentContainer, filterFragment);
-            fTrans.addToBackStack(null);
+            if (addToStack) {
+                fTrans.addToBackStack(null);
+            }
             fTrans.commit();
             setTitle(R.string.title_filter);
             fragmentStatus = NPF.FRAGMENT_FILTER;
         }
     }
 
-    public void setViewSettings() {
+    public void setViewSettings(boolean addToStack) {
         if (fragmentStatus != NPF.FRAGMENT_SETTINGS) {
             fTrans = getFragmentManager().beginTransaction();
             fTrans.replace(R.id.fragmentContainer, settingsFragment);
-            fTrans.addToBackStack(null);
+            if (addToStack) {
+                fTrans.addToBackStack(null);
+            }
             fTrans.commit();
             setTitle(R.string.title_settings);
             fragmentStatus = NPF.FRAGMENT_SETTINGS;
@@ -72,15 +80,15 @@ public class MainActivity extends AppCompatActivity {
             switch (item.getItemId()) {
                 case R.id.navigation_property_list:
                     //mTextMessage.setText(R.string.title_property_list);
-                    setViewPropertyList();
+                    setViewPropertyList(true);
                     return true;
                 case R.id.navigation_filter:
                     //mTextMessage.setText(R.string.title_filter);
-                    setViewFilter();
+                    setViewFilter(true);
                     return true;
                 case R.id.navigation_settings:
                     //mTextMessage.setText(R.string.title_settings);
-                    setViewSettings();
+                    setViewSettings(true);
                     return true;
             }
             return false;
@@ -100,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
         settingsFragment = new SettingsFragment();
 
         //mTextMessage = (TextView) findViewById(R.id.message);
-        setViewPropertyList();
+        setViewPropertyList(false);
         navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
