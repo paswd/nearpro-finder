@@ -37,5 +37,6 @@ public class SettingsFragment extends Fragment {
         super.onResume();
         //nav.setSelectedItemId(R.id.navigation_settings);
         nav.getMenu().getItem(NPF.MENU_ITEM_SETTINGS).setChecked(true);
+        getActivity().setTitle(getResources().getString(R.string.title_settings));
     }
 }

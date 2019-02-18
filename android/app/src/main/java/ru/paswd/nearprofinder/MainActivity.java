@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
                 fTrans.addToBackStack(null);
             }
             fTrans.commit();
-            setTitle(R.string.title_property_list);
+            //setTitle(R.string.title_property_list);
             fragmentStatus = NPF.FRAGMENT_PROPERTY_LIST;
         }
     }
@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
                 fTrans.addToBackStack(null);
             }
             fTrans.commit();
-            setTitle("Объект");
+            //setTitle("Объект");
             fragmentStatus = NPF.FRAGMENT_PROPERTY_ITEM;
         }
     }
@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
                 fTrans.addToBackStack(null);
             }
             fTrans.commit();
-            setTitle(R.string.title_filter);
+            //setTitle(R.string.title_filter);
             fragmentStatus = NPF.FRAGMENT_FILTER;
         }
     }
@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
                 fTrans.addToBackStack(null);
             }
             fTrans.commit();
-            setTitle(R.string.title_settings);
+            //setTitle(R.string.title_settings);
             fragmentStatus = NPF.FRAGMENT_SETTINGS;
         }
     }

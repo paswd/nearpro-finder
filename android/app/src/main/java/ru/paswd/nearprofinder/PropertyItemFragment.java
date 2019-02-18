@@ -44,6 +44,7 @@ public class PropertyItemFragment extends Fragment {
     public void onResume() {
         super.onResume();
         //nav.setSelectedItemId(R.id.navigation_property_list);
+        getActivity().setTitle("Объект");
     }
 
 }
