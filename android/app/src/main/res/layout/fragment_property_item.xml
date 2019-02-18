@@ -13,23 +13,26 @@
             android:orientation="vertical"
             android:layout_margin="10dp">
             <ImageView
-                android:id="@+id/fragmentPropertyItemImage"
+                android:id="@+id/propertyItemImage"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:src="@drawable/tmp_icon"
                 android:layout_marginBottom="10dp" />
             <TextView
+                android:id="@+id/propertyItemPrice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="100 000 ₽"
                 android:textStyle="italic"/>
             <TextView
+                android:id="@+id/propertyItemAddress"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
                 android:text="г. Москва, ул. Тверская, д.2"
                 android:textStyle="bold" />
             <TextView
+                android:id="@+id/propertyItemPointsDistance"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingLeft="20dp"
@@ -38,6 +41,7 @@
                 android:layout_marginBottom="10dp"
                 android:text="* item 1\n* item 2\n* item 3\n* item 4" />
             <TextView
+                android:id="@+id/propertyItemDescription"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:singleLine="false"
