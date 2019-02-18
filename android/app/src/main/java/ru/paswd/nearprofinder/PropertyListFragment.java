@@ -7,6 +7,7 @@ import android.support.design.widget.BottomNavigationView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import java.util.ArrayList;
@@ -17,16 +18,20 @@ public class PropertyListFragment extends Fragment {
     ArrayList<PropertyItem> propertyItems = new ArrayList<>();
     PropertyListAdapter adapter;
     View view;
+    BottomNavigationView navigation;
+    MainActivity activity;
 
     private BottomNavigationView nav;
 
-    void setContext(Context ctx) {
+    public void setContext(Context ctx) {
         context = ctx;
     }
 
     public void setNavigation(BottomNavigationView navigation) {
         nav = navigation;
     }
+
+    public void setActivity(MainActivity act) { activity = act; }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -37,6 +42,13 @@ public class PropertyListFragment extends Fragment {
         adapter = new PropertyListAdapter(context, propertyItems);
         ListView propertyListView = (ListView) view.findViewById(R.id.propertyListView);
         propertyListView.setAdapter(adapter);
+
+        propertyListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                activity.setViewPropertyItem();
+            }
+        });
 
         return view;
     }
