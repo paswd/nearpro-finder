@@ -68,13 +68,17 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:hint="От" />
+                    android:inputType="number"
+                    android:hint="От"
+                    android:theme="@style/EditTextStyle" />
                 <EditText
                     android:id="@+id/filterPriceMax"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:hint="До"/>
+                    android:inputType="number"
+                    android:hint="До"
+                    android:theme="@style/EditTextStyle" />
             </LinearLayout>
 
             <Button
@@ -82,7 +86,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
-                android:textColor="@color/colorPrimary"
+                android:textColor="@color/colorPrimaryDark"
                 android:background="#DDD"
                 android:text="Список точек"/>
             <Button
