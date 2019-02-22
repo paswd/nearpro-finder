@@ -11,6 +11,7 @@ public class AuthActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setTitle("Авторизация");
         setContentView(R.layout.activity_auth);
         Button buttonAuth = (Button) findViewById(R.id.buttonAuth);
         buttonAuth.setOnClickListener(new View.OnClickListener() {

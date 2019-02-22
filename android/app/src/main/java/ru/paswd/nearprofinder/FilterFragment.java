@@ -19,7 +19,7 @@ public class FilterFragment extends Fragment {
     private ArrayList<String> countriesList = new ArrayList<>();
     private ArrayList<String> regionsList = new ArrayList<>();
     private ArrayList<String> citiesList = new ArrayList<>();
-    private ArrayList<String> propertyTypesList = new ArrayList();
+    private ArrayList<String> propertyTypesList = new ArrayList<>();
 
     public void setNavigation(BottomNavigationView navigation) {
         nav = navigation;
