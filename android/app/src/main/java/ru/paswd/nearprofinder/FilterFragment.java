@@ -3,6 +3,7 @@ package ru.paswd.nearprofinder;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,6 +42,8 @@ public class FilterFragment extends Fragment {
         //nav.setSelectedItemId(R.id.navigation_filter);
         nav.getMenu().getItem(NPF.MENU_ITEM_FILTER).setChecked(true);
         getActivity().setTitle(getResources().getString(R.string.title_filter));
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowHomeEnabled(false);
     }
 
     private void testListsFill() {
