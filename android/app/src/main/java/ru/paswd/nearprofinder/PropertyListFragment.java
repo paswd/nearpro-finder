@@ -2,6 +2,7 @@ package ru.paswd.nearprofinder;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
@@ -47,7 +48,8 @@ public class PropertyListFragment extends Fragment {
         propertyListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                activity.setViewPropertyItem(true);
+                //activity.setViewPropertyItem(true);
+                startActivity(new Intent(context, PropertyItemActivity.class));
             }
         });
 

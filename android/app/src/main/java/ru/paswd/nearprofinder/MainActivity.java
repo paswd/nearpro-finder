@@ -14,20 +14,29 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
+
 public class MainActivity extends AppCompatActivity {
     //private TextView mTextMessage;
     private FragmentTransaction fTrans;
-    private int fragmentStatus;
+    //private int fragmentStatus;
+
     private PropertyListFragment propertyListFragment;
-    private PropertyItemFragment propertyItemFragment;
+    //private PropertyItemFragment propertyItemFragment;
     private FilterFragment filterFragment;
     private SettingsFragment settingsFragment;
     private PointsListFragment pointsListFragment;
+    private Deque<Integer> fragmentStatusStack;
 
     private BottomNavigationView navigation;
 
+    public Integer removeNull(Integer num) {
+        return (num != null ? num : -1);
+    }
+
     public void setViewPropertyList(boolean addToStack) {
-        if (fragmentStatus != NPF.FRAGMENT_PROPERTY_LIST) {
+        if (removeNull(fragmentStatusStack.peek()) != NPF.FRAGMENT_PROPERTY_LIST) {
             fTrans = getFragmentManager().beginTransaction();
             fTrans.replace(R.id.fragmentContainer, propertyListFragment);
             if (addToStack) {
@@ -35,25 +44,28 @@ public class MainActivity extends AppCompatActivity {
             }
             fTrans.commit();
             //setTitle(R.string.title_property_list);
-            fragmentStatus = NPF.FRAGMENT_PROPERTY_LIST;
+            //fragmentStatus = NPF.FRAGMENT_PROPERTY_LIST;
+            fragmentStatusStack.push(NPF.FRAGMENT_PROPERTY_LIST);
         }
     }
 
-    public void setViewPropertyItem(boolean addToStack) {
-        if (fragmentStatus != NPF.FRAGMENT_PROPERTY_ITEM) {
+    /*public void setViewPropertyItem(boolean addToStack) {
+        if (removeNull(fragmentStatusStack.peek()) != NPF.FRAGMENT_PROPERTY_ITEM) {
             fTrans = getFragmentManager().beginTransaction();
             fTrans.replace(R.id.fragmentContainer, propertyItemFragment);
+
             if (addToStack) {
                 fTrans.addToBackStack(null);
             }
             fTrans.commit();
             //setTitle("Объект");
-            fragmentStatus = NPF.FRAGMENT_PROPERTY_ITEM;
+            //fragmentStatus = NPF.FRAGMENT_PROPERTY_ITEM;
+            fragmentStatusStack.push(NPF.FRAGMENT_PROPERTY_ITEM);
         }
-    }
+    }*/
 
     public void setViewFilter(boolean addToStack) {
-        if (fragmentStatus != NPF.FRAGMENT_FILTER) {
+        if (removeNull(fragmentStatusStack.peek()) != NPF.FRAGMENT_FILTER) {
             fTrans = getFragmentManager().beginTransaction();
             fTrans.replace(R.id.fragmentContainer, filterFragment);
             if (addToStack) {
@@ -61,12 +73,12 @@ public class MainActivity extends AppCompatActivity {
             }
             fTrans.commit();
             //setTitle(R.string.title_filter);
-            fragmentStatus = NPF.FRAGMENT_FILTER;
+            fragmentStatusStack.push(NPF.FRAGMENT_FILTER);
         }
     }
 
     public void setViewSettings(boolean addToStack) {
-        if (fragmentStatus != NPF.FRAGMENT_SETTINGS) {
+        if (removeNull(fragmentStatusStack.peek()) != NPF.FRAGMENT_SETTINGS) {
             fTrans = getFragmentManager().beginTransaction();
             fTrans.replace(R.id.fragmentContainer, settingsFragment);
             if (addToStack) {
@@ -74,12 +86,12 @@ public class MainActivity extends AppCompatActivity {
             }
             fTrans.commit();
             //setTitle(R.string.title_settings);
-            fragmentStatus = NPF.FRAGMENT_SETTINGS;
+            fragmentStatusStack.push(NPF.FRAGMENT_SETTINGS);
         }
     }
 
     public void setViewPointsList(boolean addToStack) {
-        if (fragmentStatus != NPF.FRAGMENT_POINTS_LIST) {
+        if (removeNull(fragmentStatusStack.peek()) != NPF.FRAGMENT_POINTS_LIST) {
             fTrans = getFragmentManager().beginTransaction();
             fTrans.replace(R.id.fragmentContainer, pointsListFragment);
             if (addToStack) {
@@ -87,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
             }
             fTrans.commit();
             //setTitle(R.string.title_settings);
-            fragmentStatus = NPF.FRAGMENT_POINTS_LIST;
+            fragmentStatusStack.push(NPF.FRAGMENT_POINTS_LIST);
         }
     }
 
@@ -122,10 +134,12 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        fragmentStatusStack = new ArrayDeque<>();
+
         propertyListFragment = new PropertyListFragment();
         //propertyListFragment.init(this, propertyListFragment.getView());
         propertyListFragment.setContext(this);
-        propertyItemFragment = new PropertyItemFragment();
+        //propertyItemFragment = new PropertyItemFragment();
         filterFragment = new FilterFragment();
         settingsFragment = new SettingsFragment();
         pointsListFragment = new PointsListFragment();
@@ -141,10 +155,10 @@ public class MainActivity extends AppCompatActivity {
         filterFragment.setActivity(this);
 
         propertyListFragment.setNavigation(navigation);
-        propertyItemFragment.setNavigation(navigation);
+        //propertyItemFragment.setNavigation(navigation);
         filterFragment.setNavigation(navigation);
         settingsFragment.setNavigation(navigation);
-        propertyItemFragment.setNavigation(navigation);
+        //propertyItemFragment.setNavigation(navigation);
         pointsListFragment.setNavigation(navigation);
 
         FloatingActionButton fab = findViewById(R.id.fab_add);
@@ -169,12 +183,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
     public void onBackPressed() {
-        /*FragmentManager fm = getSupportFragmentManager();
+        android.app.FragmentManager fm = getFragmentManager();
         if (fm.getBackStackEntryCount() > 0) {
-            fm.popBackStack();
+            fm.popBackStackImmediate();
+            fragmentStatusStack.pop();
         } else {
             finish();
-        }*/
+        }
     }
 
 }

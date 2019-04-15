@@ -107,10 +107,10 @@ public class PointsListFragment extends Fragment {
     public void onResume() {
         super.onResume();
         //nav.setSelectedItemId(R.id.navigation_property_list);
-        nav.getMenu().getItem(NPF.MENU_ITEM_PROPERTY_LIST).setChecked(true);
+        nav.getMenu().getItem(NPF.MENU_ITEM_FILTER).setChecked(true);
         getActivity().setTitle(getResources().getString(R.string.title_points_list));
-        ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-        ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowHomeEnabled(false);
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowHomeEnabled(true);
     }
 
     @Override
