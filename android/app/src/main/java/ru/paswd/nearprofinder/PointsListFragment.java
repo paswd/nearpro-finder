@@ -23,6 +23,7 @@ public class PointsListFragment extends Fragment {
     private View view;
     private BottomNavigationView navigation;
     private MainActivity activity;
+    private FloatingActionButton fab_add;
 
     private BottomNavigationView nav;
 
@@ -34,7 +35,10 @@ public class PointsListFragment extends Fragment {
         nav = navigation;
     }
 
-    public void setActivity(MainActivity act) { activity = act; }
+    public void setActivity(MainActivity act) {
+        activity = act;
+        fab_add = activity.findViewById(R.id.fab_add);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -45,21 +49,33 @@ public class PointsListFragment extends Fragment {
         adapter = new PointsListAdapter(context, pointsItems);
         ListView pointsListView = (ListView) view.findViewById(R.id.propertyListView);
         pointsListView.setAdapter(adapter);
-        /*pointsListView.setOnScrollListener(new AbsListView.OnScrollListener() {
+        pointsListView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView v, int scrollState) {
-                if (scrollState == SCROLL_STATE_IDLE){
-                    FloatingActionButton fab_add = view.findViewById(R.id.fab_add);
-                    fab_add.animate().scaleX(1f).scalY(1f).start();
-                    flag = true;
-                }
+                /*FloatingActionButton fab_add = view.findViewById(R.id.fab_add);
+                if (scrollState == SCROLL_STATE_IDLE) {
+                    fab_add.hide();
+                } else {
+                    fab_add.show();
+                }*/
             }
 
             @Override
-            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-
+            public void onScroll(AbsListView v, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                if (fab_add == null) {
+                    return;
+                }
+                if (firstVisibleItem + visibleItemCount > totalItemCount - 2 && visibleItemCount <= totalItemCount) {
+                    if (fab_add.getVisibility() == View.VISIBLE) {
+                        fab_add.hide();
+                    }
+                } else {
+                    if (fab_add.getVisibility() != View.VISIBLE) {
+                        fab_add.show();
+                    }
+                }
             }
-        });*/
+        });
 
         /*pointsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -87,6 +103,12 @@ public class PointsListFragment extends Fragment {
         getActivity().setTitle(getResources().getString(R.string.title_points_list));
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowHomeEnabled(false);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        fab_add.hide();
     }
 
     void testFillPropertyList() {

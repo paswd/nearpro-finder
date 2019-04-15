@@ -34,6 +34,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_margin="16dp"
+            android:visibility="invisible"
             app:srcCompat="@drawable/ic_plus" />
     </FrameLayout>
 
