@@ -5,6 +5,7 @@
     android:layout_height="wrap_content"
     android:paddingTop="10dp"
     android:paddingBottom="10dp"
+    android:paddingLeft="10dp"
     android:orientation="horizontal">
 
     <LinearLayout
@@ -21,19 +22,22 @@
             android:layout_height="wrap_content"
             android:text="Заголовок"
             android:textStyle="bold"
+            android:textColor="@color/colorTextPrimary"
             android:textSize="20sp" />
         <TextView
             android:id="@+id/itemPointsListViewAddress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="г. Москва, Волоколамское-Какое-нибудь-ещё ш., 32"
-            android:textStyle="normal" />
+            android:textStyle="normal"
+            android:textColor="@color/colorTextSecondary" />
         <TextView
             android:id="@+id/itemPointsListViewCoordinate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="55°45.35′N, 37°37.06′E"
-            android:textStyle="italic" />
+            android:textStyle="italic"
+            android:textColor="@color/colorTextSecondary" />
     </LinearLayout>
     <LinearLayout
         android:id="@+id/itemPointsListViewButtonLayout"

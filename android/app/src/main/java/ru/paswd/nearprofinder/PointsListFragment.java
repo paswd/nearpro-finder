@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +21,7 @@ public class PointsListFragment extends Fragment {
     private Context context;
     private ArrayList<PointsItem> pointsItems = new ArrayList<>();
     private PointsListAdapter adapter;
+    private ListView pointsListView;
     private View view;
     private BottomNavigationView navigation;
     private MainActivity activity;
@@ -47,17 +49,11 @@ public class PointsListFragment extends Fragment {
         view = inflater.inflate(R.layout.fragment_property_list, null);
         testFillPropertyList();
         adapter = new PointsListAdapter(context, pointsItems);
-        ListView pointsListView = (ListView) view.findViewById(R.id.propertyListView);
+        pointsListView = (ListView) view.findViewById(R.id.propertyListView);
         pointsListView.setAdapter(adapter);
         pointsListView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView v, int scrollState) {
-                /*FloatingActionButton fab_add = view.findViewById(R.id.fab_add);
-                if (scrollState == SCROLL_STATE_IDLE) {
-                    fab_add.hide();
-                } else {
-                    fab_add.show();
-                }*/
             }
 
             @Override
@@ -65,7 +61,19 @@ public class PointsListFragment extends Fragment {
                 if (fab_add == null) {
                     return;
                 }
-                if (firstVisibleItem + visibleItemCount > totalItemCount - 2 && visibleItemCount <= totalItemCount) {
+                ListView plv = view.findViewById(R.id.propertyListView);
+                //if (firstVisibleItem + visibleItemCount > totalItemCount - 2 && visibleItemCount <= totalItemCount) {
+                int a = plv.getHeight();
+                int bottom = (plv.getHeight() > 0 ?
+                        plv.getChildAt(plv.getChildCount() - 1).getBottom() : 0);
+                boolean isOnBottom = plv.getLastVisiblePosition() == plv.getAdapter().getCount() -1 &&
+                        bottom == plv.getHeight();
+                /*Log.e("IsOnBottom", Boolean.toString(isOnBottom));
+                Log.e("Count", Integer.toString(plv.getAdapter().getCount()));
+                Log.e("LastVisiblePosition", Integer.toString(plv.getLastVisiblePosition()));
+                Log.e("Bottom", Integer.toString(bottom));
+                Log.e("Height", Integer.toString(plv.getHeight()));*/
+                if (isOnBottom && plv.getHeight() > 0) {
                     if (fab_add.getVisibility() == View.VISIBLE) {
                         fab_add.hide();
                     }
@@ -113,7 +121,7 @@ public class PointsListFragment extends Fragment {
 
     void testFillPropertyList() {
         pointsItems.clear();
-        for (int i = 0; i < 11; i++) {
+        for (int i = 0; i < 6; i++) {
             pointsItems.add(new PointsItem("Точка " + i, "Адрес", "55°45.35′N, 37°37.06′E"));
         }
     }
