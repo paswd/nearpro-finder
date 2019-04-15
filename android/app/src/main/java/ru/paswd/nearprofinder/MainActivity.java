@@ -4,10 +4,13 @@ import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
@@ -19,6 +22,7 @@ public class MainActivity extends AppCompatActivity {
     private PropertyItemFragment propertyItemFragment;
     private FilterFragment filterFragment;
     private SettingsFragment settingsFragment;
+    private PointsListFragment pointsListFragment;
 
     private BottomNavigationView navigation;
 
@@ -74,6 +78,19 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void setViewPointsList(boolean addToStack) {
+        if (fragmentStatus != NPF.FRAGMENT_POINTS_LIST) {
+            fTrans = getFragmentManager().beginTransaction();
+            fTrans.replace(R.id.fragmentContainer, pointsListFragment);
+            if (addToStack) {
+                fTrans.addToBackStack(null);
+            }
+            fTrans.commit();
+            //setTitle(R.string.title_settings);
+            fragmentStatus = NPF.FRAGMENT_POINTS_LIST;
+        }
+    }
+
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
 
@@ -111,6 +128,8 @@ public class MainActivity extends AppCompatActivity {
         propertyItemFragment = new PropertyItemFragment();
         filterFragment = new FilterFragment();
         settingsFragment = new SettingsFragment();
+        pointsListFragment = new PointsListFragment();
+        pointsListFragment.setContext(this);
 
         //mTextMessage = (TextView) findViewById(R.id.message);
         setViewPropertyList(false);
@@ -118,12 +137,25 @@ public class MainActivity extends AppCompatActivity {
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         propertyListFragment.setActivity(this);
+        pointsListFragment.setActivity(this);
+        filterFragment.setActivity(this);
 
         propertyListFragment.setNavigation(navigation);
         propertyItemFragment.setNavigation(navigation);
         filterFragment.setNavigation(navigation);
         settingsFragment.setNavigation(navigation);
         propertyItemFragment.setNavigation(navigation);
+        pointsListFragment.setNavigation(navigation);
+
+        FloatingActionButton fab = findViewById(R.id.fab_add);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Snackbar.make(v, "Here's a Snackbar", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null)
+                        .show();
+            }
+        });
     }
 
     @Override

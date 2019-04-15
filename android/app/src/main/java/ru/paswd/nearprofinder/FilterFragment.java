@@ -21,10 +21,13 @@ public class FilterFragment extends Fragment {
     private ArrayList<String> regionsList = new ArrayList<>();
     private ArrayList<String> citiesList = new ArrayList<>();
     private ArrayList<String> propertyTypesList = new ArrayList<>();
+    private MainActivity activity;
 
     public void setNavigation(BottomNavigationView navigation) {
         nav = navigation;
     }
+
+    public void setActivity(MainActivity act) { activity = act; }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -32,6 +35,14 @@ public class FilterFragment extends Fragment {
         view = inflater.inflate(R.layout.fragment_filter, null);
         testListsFill();
         initSpinners();
+        Button btnPointsList = view.findViewById(R.id.filterPointsList);
+        btnPointsList.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //setViewPointsList();
+                activity.setViewPointsList(true);
+            }
+        });
         //Button buttonExit = (Button) view.findViewById(R.id.)
         return view;
     }

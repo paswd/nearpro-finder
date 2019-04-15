@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp"
+    android:orientation="horizontal">
+
+    <LinearLayout
+        android:id="@+id/itemPointsListViewTextLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="6"
+        android:paddingRight="10dp"
+        android:paddingLeft="5dp"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/itemPointsListViewTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Заголовок"
+            android:textStyle="bold"
+            android:textSize="20sp" />
+        <TextView
+            android:id="@+id/itemPointsListViewAddress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="г. Москва, Волоколамское-Какое-нибудь-ещё ш., 32"
+            android:textStyle="normal" />
+        <TextView
+            android:id="@+id/itemPointsListViewCoordinate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="55°45.35′N, 37°37.06′E"
+            android:textStyle="italic" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/itemPointsListViewButtonLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:paddingTop="20dp"
+        android:orientation="horizontal"
+        android:textAlignment="center">
+        <ImageView
+            android:id="@+id/itemPointsListViewEdit"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginRight="10dp"
+            android:src="@drawable/ic_pencil"/>
+        <ImageView
+            android:id="@+id/itemPointsListViewDelete"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_delete"/>
+    </LinearLayout>
+</LinearLayout>
