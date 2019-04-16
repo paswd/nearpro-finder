@@ -1,6 +1,7 @@
 package ru.paswd.nearprofinder;
 
 import android.app.Fragment;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
@@ -40,7 +41,8 @@ public class FilterFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 //setViewPointsList();
-                activity.setViewPointsList(true);
+                //activity.setViewPointsList(true);
+                startActivity(new Intent(activity, PointsViewActivity.class));
             }
         });
         //Button buttonExit = (Button) view.findViewById(R.id.)
