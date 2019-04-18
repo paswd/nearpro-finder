@@ -22,6 +22,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.TreeMap;
@@ -30,6 +31,8 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
     final Context context = this;
     private GoogleMap mMap;
     private TreeMap<String, LatLng> pointsList;
+    private View alertEditTextLayout;
+    //private View alertMarkerMenuLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +47,13 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         pointsList = new TreeMap<>();
+
+        LayoutInflater inflater = getLayoutInflater();
+        alertEditTextLayout = inflater.inflate(R.layout.alert_edit_text,
+                (ViewGroup) findViewById(R.id.alertEditTextLayout));
+        /*alertMarkerMenuLayout = inflater.inflate(R.layout.alert_marker_menu,
+                (ViewGroup) findViewById(R.id.alertMarkerMenuLayout));*/
+
         setTitle("Список точек");
     }
 
@@ -105,6 +115,12 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(final LatLng latLng) {
+
+            }
+        });
+        mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+            @Override
+            public void onMapLongClick(final LatLng latLng) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(context);
                 builder.setTitle("Добавление точки");
                 //final EditText dialogInput = new EditText(context);
@@ -113,15 +129,15 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
 
                 //builder.setView(dialogInput);
 
-                LayoutInflater inflater = getLayoutInflater();
+                /*LayoutInflater inflater = getLayoutInflater();
                 final View layout = inflater.inflate(R.layout.alert_edittext,
-                        (ViewGroup) findViewById(R.id.alert_layout));
+                        (ViewGroup) findViewById(R.id.alert_layout));*/
                 //TextView title = layout.findViewById(R.id.alert_title);
-                final EditText dialogInput = layout.findViewById(R.id.alert_data);
+                final EditText dialogInput = alertEditTextLayout.findViewById(R.id.alertData);
 
                 //title.setText("Название точки:");
                 dialogInput.setHint("Название точки");
-                builder.setView(layout);
+                builder.setView(alertEditTextLayout);
 
                 builder.setPositiveButton("Добавить", new DialogInterface.OnClickListener() {
                     @Override
@@ -140,6 +156,7 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
                             return;
                         }
                         mMap.addMarker(new MarkerOptions().position(latLng).title(pointTitle));
+
                         pointsList.put(pointTitle, latLng);
 
                     }
@@ -158,10 +175,62 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
 
             }
         });
-        mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+
+        /*mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
-            public void onMapLongClick(LatLng latLng) {
-                //Show droplist menu
+            public boolean onMarkerClick(Marker marker) {
+                return false;
+            }
+        });*/
+        mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+                //showWarningAlert("Context", "Нажатие на название маркера");
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setTitle(marker.getTitle());
+
+                //TextView markerTitle = alertMarkerMenuLayout.findViewById(R.id.alertMarkerTitle);
+                /*TextView markerEditBtn = alertMarkerMenuLayout.findViewById(R.id.alertMarkerEdit);
+                TextView markerDeleteBtn = alertMarkerMenuLayout.findViewById(R.id.alertMarkerDelete);*/
+
+                //markerTitle.setText(marker.getTitle());
+                /*markerEditBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        showWarningAlert("Редактирование", "Редактирование маркера");
+                    }
+                });
+                markerDeleteBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        showWarningAlert("Удаление", "Удаление маркера");
+                    }
+                });*/
+                builder.setPositiveButton("Редактировать", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        showWarningAlert("Редактирование", "Редактирование маркера");
+                    }
+                });
+                builder.setNegativeButton("Удалить", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        showWarningAlert("Удаление", "Удаление маркера");
+                    }
+                });
+                builder.setNeutralButton("Отмена", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //Nothing to do
+                    }
+                });
+
+                //builder.setView(alertMarkerMenuLayout);
+                AlertDialog dlg = builder.create();
+                dlg.show();
+                setButtonPrimaryColor(dlg.getButton(DialogInterface.BUTTON_POSITIVE));
+                setButtonPrimaryColor(dlg.getButton(DialogInterface.BUTTON_NEGATIVE));
+                setButtonPrimaryColor(dlg.getButton(DialogInterface.BUTTON_NEUTRAL));
             }
         });
     }
