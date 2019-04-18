@@ -483,7 +483,11 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
                 onBackPressed();
                 return true;
             case R.id.action_points_clear:
-                showMapClearAlert();
+                if (pointsList.isEmpty()) {
+                    showInfoAlert("Очистка карты", "Карта уже была очищена, или на неё не было установлено ни одной точки");
+                } else {
+                    showMapClearAlert();
+                }
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
