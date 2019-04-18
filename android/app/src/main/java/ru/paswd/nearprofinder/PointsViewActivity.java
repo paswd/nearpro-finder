@@ -70,11 +70,15 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
 
     }
 
+    private void updatePointStorage() {
+        //showInfoAlert("Update storage", "Storage Updated");
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_points_view);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -85,8 +89,8 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
         pointsList = new HashMap<>();
         importPointsListFromStorage();
 
-        LayoutInflater inflater = getLayoutInflater();
-        /*alertEditTextLayout = inflater.inflate(R.layout.alert_edit_text,
+        /*LayoutInflater inflater = getLayoutInflater();
+        alertEditTextLayout = inflater.inflate(R.layout.alert_edit_text,
                 (ViewGroup) findViewById(R.id.alertEditTextLayout));
         alertMarkerMenuLayout = inflater.inflate(R.layout.alert_marker_menu,
                 (ViewGroup) findViewById(R.id.alertMarkerMenuLayout));*/
@@ -119,6 +123,26 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
      * installed Google Play services and returned to the app.
      */
 
+    private void addMarker(LatLng latLng, String title) {
+        Marker addedMarker = mMap.addMarker(new MarkerOptions().position(latLng).title(title));
+        pointsList.put(addedMarker.getTitle(), addedMarker);
+        updatePointStorage();
+    }
+
+    private void renameMarker(Marker marker, String newTitle) {
+        pointsList.remove(marker.getTitle());
+        marker.setTitle(newTitle);
+        pointsList.put(marker.getTitle(), marker);
+        marker.showInfoWindow();
+        updatePointStorage();
+    }
+
+    private void removeMarker(Marker marker) {
+        pointsList.remove(marker.getTitle());
+        marker.remove();
+        updatePointStorage();
+    }
+
     public void setButtonPrimaryColor(Button button) {
         if (button != null) {
             button.setTextColor(getResources().getColor(R.color.colorPrimaryDark));
@@ -140,15 +164,42 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
         setButtonPrimaryColor(dlg.getButton(DialogInterface.BUTTON_POSITIVE));
     }
 
-    public void showPointEditableAlert(Marker marker) {
+    private void showPointDeleteAlert(final Marker marker) {
+        String strText = "Вы действительно хотите удалить точку \"" + marker.getTitle() + "\"? \n\n";
+        strText += "Это действие невозможно будет отменить";
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("Удаление точки");
+        builder.setMessage(strText);
+        builder.setPositiveButton("Удалить", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //showInfoAlert("Удаление", "Точка удалена");
+                removeMarker(marker);
+            }
+        });
+        builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //Nothing to do
+            }
+        });
+
+        AlertDialog dlg = builder.create();
+        dlg.show();
+        setButtonPrimaryColor(dlg.getButton(DialogInterface.BUTTON_POSITIVE));
+        setButtonPrimaryColor(dlg.getButton(DialogInterface.BUTTON_NEGATIVE));
+    }
+
+    private void showPointEditableAlert(Marker marker) {
         showPointEditableAlert(null, marker);
     }
 
-    public void showPointEditableAlert(LatLng latLng) {
+    private void showPointEditableAlert(LatLng latLng) {
         showPointEditableAlert(latLng, null);
     }
 
-    public void showPointEditableAlert(final LatLng latLng, final Marker marker) {
+    private void showPointEditableAlert(final LatLng latLng, final Marker marker) {
         if (latLng == null && marker == null) {
             return;
         }
@@ -165,7 +216,7 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
 
         String onClickButtonTitle;
         if (marker != null) {
-            builder.setTitle("Редактирование точки");
+            builder.setTitle("Переименование точки");
             dialogInput.setText(marker.getTitle());
             onClickButtonTitle = "Изменить";
         } else {
@@ -200,14 +251,9 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
                 }
 
                 if (marker != null) {
-                    pointsList.remove(marker.getTitle());
-                    marker.setTitle(pointTitle);
-                    pointsList.put(marker.getTitle(), marker);
-                    marker.hideInfoWindow();
-                    marker.showInfoWindow();
+                    renameMarker(marker, pointTitle);
                 } else if (latLng != null) {
-                    Marker addedMarker = mMap.addMarker(new MarkerOptions().position(latLng).title(pointTitle));
-                    pointsList.put(addedMarker.getTitle(), addedMarker);
+                    addMarker(latLng, pointTitle);
                 }
             }
         });
@@ -242,7 +288,6 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
         mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
             @Override
             public void onMapLongClick(final LatLng latLng) {
-                //ddd
                 showPointEditableAlert(latLng);
             }
         });
@@ -260,24 +305,7 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
                 AlertDialog.Builder builder = new AlertDialog.Builder(context);
                 builder.setTitle(marker.getTitle());
 
-                //TextView markerTitle = alertMarkerMenuLayout.findViewById(R.id.alertMarkerTitle);
-                /*TextView markerEditBtn = alertMarkerMenuLayout.findViewById(R.id.alertMarkerEdit);
-                TextView markerDeleteBtn = alertMarkerMenuLayout.findViewById(R.id.alertMarkerDelete);*/
-
-                //markerTitle.setText(marker.getTitle());
-                /*markerEditBtn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        showWarningAlert("Редактирование", "Редактирование маркера");
-                    }
-                });
-                markerDeleteBtn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        showWarningAlert("Удаление", "Удаление маркера");
-                    }
-                });*/
-                builder.setPositiveButton("Редактировать", new DialogInterface.OnClickListener() {
+                builder.setPositiveButton("Переименовать", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         //showInfoAlert("Редактирование", "Редактирование маркера");
@@ -287,7 +315,8 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
                 builder.setNegativeButton("Удалить", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        showInfoAlert("Удаление", "Удаление маркера");
+                        //showInfoAlert("Удаление", "Удаление маркера");
+                        showPointDeleteAlert(marker);
                     }
                 });
                 builder.setNeutralButton("Отмена", new DialogInterface.OnClickListener() {
