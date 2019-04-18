@@ -15,6 +15,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -123,6 +124,16 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
         updatePointStorage();
     }
 
+    private void clearAllPoints() {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        db.delete(NPF.DB_TABLE_POINTS_LIST, null, null);
+
+        for (Marker i : pointsList.values()) {
+            i.remove();
+        }
+        pointsList.clear();
+    }
+
     private long getCurrentUnixTimestamp() {
         return System.currentTimeMillis() / 1000L;
     }
@@ -209,6 +220,7 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -218,20 +230,6 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
         //importPointsListFromStorage();
 
         setTitle("Список точек");
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                onBackPressed();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-    public void onBackPressed() {
-        finish();
     }
 
 
@@ -268,7 +266,7 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
 
     private void showPointDeleteAlert(final Marker marker) {
         String strText = "Вы действительно хотите удалить точку \"" + marker.getTitle() + "\"? \n\n";
-        strText += "Это действие невозможно будет отменить";
+        strText += "Это действие необратимо";
 
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("Удаление точки");
@@ -278,6 +276,31 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
             public void onClick(DialogInterface dialog, int which) {
                 //showInfoAlert("Удаление", "Точка удалена");
                 removePoint(marker);
+            }
+        });
+        builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //Nothing to do
+            }
+        });
+
+        AlertDialog dlg = builder.create();
+        dlg.show();
+        setButtonPrimaryColor(dlg.getButton(DialogInterface.BUTTON_POSITIVE));
+        setButtonPrimaryColor(dlg.getButton(DialogInterface.BUTTON_NEGATIVE));
+    }
+    private void showMapClearAlert() {
+        String strText = "Вы действительно хотите очистить карту? Это действие необратимо";
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("Очистить карту");
+        builder.setMessage(strText);
+        builder.setPositiveButton("Очистить", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //showInfoAlert("Удаление", "Точка удалена");
+                clearAllPoints();
             }
         });
         builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
@@ -444,5 +467,30 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
             }
         });
         importPointsListFromStorage();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.points_view_toolbar_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+            case R.id.action_points_clear:
+                showMapClearAlert();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    public void onBackPressed() {
+        finish();
     }
 }
