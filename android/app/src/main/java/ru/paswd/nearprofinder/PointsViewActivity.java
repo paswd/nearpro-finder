@@ -6,6 +6,8 @@ import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.location.Address;
+import android.location.Geocoder;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -29,7 +31,10 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.TreeMap;
 
 public class PointsViewActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -140,6 +145,56 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
             } while (cr.moveToNext());
         }
         cr.close();
+    }
+
+    private String makeNotNull(String str) {
+        return (str != null ? str : "");
+    }
+
+    private String convertAddressListToUnit(ArrayList<String> addresses) {
+        StringBuilder res = new StringBuilder();
+
+        boolean first = true;
+        for (String i : addresses) {
+            if (i.isEmpty()) {
+                continue;
+            }
+            if (!first) {
+                res.append(", ");
+            }
+            first = false;
+            res.append(i);
+        }
+
+        return res.toString();
+    }
+
+
+    private String getAddress(LatLng latLng) {
+        try {
+            Geocoder geo = new Geocoder(this, Locale.getDefault());
+            List<Address> addresses = geo.getFromLocation(latLng.latitude, latLng.longitude, 1);
+            String res = "";
+
+            if (!addresses.isEmpty()) {
+                ArrayList<String> addressesList = new ArrayList<>();
+                //addressesList.add(makeNotNull(addresses.get(0).getAddressLine(0))); // Адрес
+
+                addressesList.add(makeNotNull(addresses.get(0).getThoroughfare())); // Улица
+                addressesList.add(makeNotNull(addresses.get(0).getFeatureName())); // Дом, корпус
+                addressesList.add(makeNotNull(addresses.get(0).getLocality())); // Город
+                addressesList.add(makeNotNull(addresses.get(0).getCountryName())); // Страна
+                addressesList.add(makeNotNull(addresses.get(0).getPostalCode())); // Индекс
+                /*res = addresses.get(0).getFeatureName() + ", " + addresses.get(0).getLocality() + ", " +
+                        addresses.get(0).getAdminArea() + ", " + addresses.get(0).getCountryName();*/
+                res = convertAddressListToUnit(addressesList);
+            }
+            return res;
+        }
+        catch (Exception e) {
+            e.printStackTrace(); // getFromLocation() may sometimes fail
+            return "ERROR: " + e.toString();
+        }
     }
 
     private void updatePointStorage() {
@@ -353,6 +408,11 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
                 //showWarningAlert("Context", "Нажатие на название маркера");
                 AlertDialog.Builder builder = new AlertDialog.Builder(context);
                 builder.setTitle("Точка \"" + marker.getTitle() + "\"");
+                String msg = "";
+                msg += getAddress(marker.getPosition()) + "\n\n";
+                msg += "Lat:\t\t" + Double.toString(marker.getPosition().latitude) + "\n";
+                msg += "Lng:\t" + Double.toString(marker.getPosition().longitude) + "\n";
+                builder.setMessage(msg);
 
                 builder.setPositiveButton("Переименовать", new DialogInterface.OnClickListener() {
                     @Override
