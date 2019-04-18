@@ -12,4 +12,7 @@ public class NPF {
     public static final int MENU_ITEM_PROPERTY_LIST = 0;
     public static final int MENU_ITEM_FILTER = 1;
     public static final int MENU_ITEM_SETTINGS = 2;
+
+    public static final String DB_TABLE_PREFIX = "npf_";
+    public static final String DB_TABLE_POINTS_LIST = DB_TABLE_PREFIX + "tablePointsList";
 }

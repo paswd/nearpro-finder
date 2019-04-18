@@ -2,6 +2,8 @@ package ru.paswd.nearprofinder;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -25,14 +27,48 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.HashMap;
 import java.util.TreeMap;
 
 public class PointsViewActivity extends AppCompatActivity implements OnMapReadyCallback {
+    /*private enum EditDialogMode {
+        ADD,
+        EDIT
+    }*/
+
     final Context context = this;
     private GoogleMap mMap;
-    private TreeMap<String, LatLng> pointsList;
-    private View alertEditTextLayout;
+    private HashMap<String, Marker> pointsList;
+    //private View alertEditTextLayout;
     //private View alertMarkerMenuLayout;
+    private DBHelper dbHelper;
+
+    class DBHelper extends SQLiteOpenHelper {
+        public DBHelper(Context context) {
+            // конструктор суперкласса
+            super(context, "npf-db", null, 1);
+        }
+
+        @Override
+        public void onCreate(SQLiteDatabase db) {
+            /*db.execSQL("CREATE TABLE " + NPF.DB_TABLE_POINTS_LIST + " (" +
+                    "id integer primary key autoincrement," +
+                    "name text," +
+                    "lat real," +
+                    "lng real," +
+                    "added integer," +
+                    "synchronized integer);");*/
+        }
+
+        @Override
+        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+
+        }
+    }
+
+    private void importPointsListFromStorage() {
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,12 +82,13 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        pointsList = new TreeMap<>();
+        pointsList = new HashMap<>();
+        importPointsListFromStorage();
 
         LayoutInflater inflater = getLayoutInflater();
-        alertEditTextLayout = inflater.inflate(R.layout.alert_edit_text,
+        /*alertEditTextLayout = inflater.inflate(R.layout.alert_edit_text,
                 (ViewGroup) findViewById(R.id.alertEditTextLayout));
-        /*alertMarkerMenuLayout = inflater.inflate(R.layout.alert_marker_menu,
+        alertMarkerMenuLayout = inflater.inflate(R.layout.alert_marker_menu,
                 (ViewGroup) findViewById(R.id.alertMarkerMenuLayout));*/
 
         setTitle("Список точек");
@@ -88,7 +125,7 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
         }
     }
 
-    public void showWarningAlert(String title, String text) {
+    public void showInfoAlert(String title, String text) {
         AlertDialog.Builder wrnBuilder = new AlertDialog.Builder(context);
         wrnBuilder.setTitle(title);
         wrnBuilder.setMessage(text);
@@ -101,6 +138,90 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
         AlertDialog dlg= wrnBuilder.create();
         dlg.show();
         setButtonPrimaryColor(dlg.getButton(DialogInterface.BUTTON_POSITIVE));
+    }
+
+    public void showPointEditableAlert(Marker marker) {
+        showPointEditableAlert(null, marker);
+    }
+
+    public void showPointEditableAlert(LatLng latLng) {
+        showPointEditableAlert(latLng, null);
+    }
+
+    public void showPointEditableAlert(final LatLng latLng, final Marker marker) {
+        if (latLng == null && marker == null) {
+            return;
+        }
+        if (latLng != null && marker != null) {
+            return;
+        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+        LayoutInflater inflater = getLayoutInflater();
+        final View layout = inflater.inflate(R.layout.alert_edit_text,
+                (ViewGroup) findViewById(R.id.alertEditTextLayout));
+
+        final EditText dialogInput = layout.findViewById(R.id.alertData);
+
+        String onClickButtonTitle;
+        if (marker != null) {
+            builder.setTitle("Редактирование точки");
+            dialogInput.setText(marker.getTitle());
+            onClickButtonTitle = "Изменить";
+        } else {
+            builder.setTitle("Добавление точки");
+            onClickButtonTitle = "Добавить";
+        }
+
+        //title.setText("Название точки:");
+        dialogInput.setHint("Название точки");
+        builder.setView(layout);
+
+        builder.setPositiveButton(onClickButtonTitle, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String pointTitle = dialogInput.getText().toString();
+                if (pointTitle.isEmpty()) {
+                    showInfoAlert("Отказано", "Название не должно быть пустым");
+                    return;
+                }
+                if (marker != null) {
+                    if (marker.getTitle().equals(pointTitle)) {
+                        return;
+                    }
+                }
+                if (pointsList.containsKey(pointTitle)) {
+                    showInfoAlert("Отказано", "Точка с таким названием существует");
+                            /*Button btn = dlg.getButton(DialogInterface.BUTTON_POSITIVE);
+                            if (btn != null) {
+
+                            }*/
+                    return;
+                }
+
+                if (marker != null) {
+                    pointsList.remove(marker.getTitle());
+                    marker.setTitle(pointTitle);
+                    pointsList.put(marker.getTitle(), marker);
+                    marker.hideInfoWindow();
+                    marker.showInfoWindow();
+                } else if (latLng != null) {
+                    Marker addedMarker = mMap.addMarker(new MarkerOptions().position(latLng).title(pointTitle));
+                    pointsList.put(addedMarker.getTitle(), addedMarker);
+                }
+            }
+        });
+        builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //Closing dialog view
+            }
+        });
+        AlertDialog dlg = builder.create();
+        dlg.show();
+
+        setButtonPrimaryColor(dlg.getButton(DialogInterface.BUTTON_POSITIVE));
+        setButtonPrimaryColor(dlg.getButton(DialogInterface.BUTTON_NEGATIVE));
     }
 
     @Override
@@ -121,58 +242,8 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
         mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
             @Override
             public void onMapLongClick(final LatLng latLng) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                builder.setTitle("Добавление точки");
-                //final EditText dialogInput = new EditText(context);
-                //dialogInput.setLayoutParams(new TableLayout.LayoutParams().setMargins());
-                //dialogInput.setInputType(InputType.TYPE_CLASS_TEXT);
-
-                //builder.setView(dialogInput);
-
-                /*LayoutInflater inflater = getLayoutInflater();
-                final View layout = inflater.inflate(R.layout.alert_edittext,
-                        (ViewGroup) findViewById(R.id.alert_layout));*/
-                //TextView title = layout.findViewById(R.id.alert_title);
-                final EditText dialogInput = alertEditTextLayout.findViewById(R.id.alertData);
-
-                //title.setText("Название точки:");
-                dialogInput.setHint("Название точки");
-                builder.setView(alertEditTextLayout);
-
-                builder.setPositiveButton("Добавить", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        String pointTitle = dialogInput.getText().toString();
-                        if (pointTitle.isEmpty()) {
-                            showWarningAlert("Отказано", "Название не должно быть пустым");
-                            return;
-                        }
-                        if (pointsList.containsKey(pointTitle)) {
-                            showWarningAlert("Отказано", "Точка с таким названием существует");
-                            /*Button btn = dlg.getButton(DialogInterface.BUTTON_POSITIVE);
-                            if (btn != null) {
-
-                            }*/
-                            return;
-                        }
-                        mMap.addMarker(new MarkerOptions().position(latLng).title(pointTitle));
-
-                        pointsList.put(pointTitle, latLng);
-
-                    }
-                });
-                builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        //Closing dialog view
-                    }
-                });
-                AlertDialog dlg = builder.create();
-                dlg.show();
-
-                setButtonPrimaryColor(dlg.getButton(DialogInterface.BUTTON_POSITIVE));
-                setButtonPrimaryColor(dlg.getButton(DialogInterface.BUTTON_NEGATIVE));
-
+                //ddd
+                showPointEditableAlert(latLng);
             }
         });
 
@@ -184,7 +255,7 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
         });*/
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
-            public void onInfoWindowClick(Marker marker) {
+            public void onInfoWindowClick(final Marker marker) {
                 //showWarningAlert("Context", "Нажатие на название маркера");
                 AlertDialog.Builder builder = new AlertDialog.Builder(context);
                 builder.setTitle(marker.getTitle());
@@ -209,13 +280,14 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
                 builder.setPositiveButton("Редактировать", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        showWarningAlert("Редактирование", "Редактирование маркера");
+                        //showInfoAlert("Редактирование", "Редактирование маркера");
+                        showPointEditableAlert(marker);
                     }
                 });
                 builder.setNegativeButton("Удалить", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        showWarningAlert("Удаление", "Удаление маркера");
+                        showInfoAlert("Удаление", "Удаление маркера");
                     }
                 });
                 builder.setNeutralButton("Отмена", new DialogInterface.OnClickListener() {
