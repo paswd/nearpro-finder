@@ -1,7 +1,9 @@
 package ru.paswd.nearprofinder;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.support.v4.app.FragmentActivity;
@@ -31,33 +33,27 @@ import java.util.HashMap;
 import java.util.TreeMap;
 
 public class PointsViewActivity extends AppCompatActivity implements OnMapReadyCallback {
-    /*private enum EditDialogMode {
-        ADD,
-        EDIT
-    }*/
 
     final Context context = this;
     private GoogleMap mMap;
     private HashMap<String, Marker> pointsList;
-    //private View alertEditTextLayout;
-    //private View alertMarkerMenuLayout;
     private DBHelper dbHelper;
 
     class DBHelper extends SQLiteOpenHelper {
         public DBHelper(Context context) {
             // конструктор суперкласса
-            super(context, "npf-db", null, 1);
+            super(context, NPF.DB_NAME, null, 1);
         }
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            /*db.execSQL("CREATE TABLE " + NPF.DB_TABLE_POINTS_LIST + " (" +
-                    "id integer primary key autoincrement," +
-                    "name text," +
+            db.execSQL("CREATE TABLE " + NPF.DB_TABLE_POINTS_LIST + " (" +
+                    "name text primary key," +
                     "lat real," +
                     "lng real," +
-                    "added integer," +
-                    "synchronized integer);");*/
+                    "updated integer," +
+                    "synchronized integer," +
+                    "deleted integer);");
         }
 
         @Override
@@ -66,8 +62,84 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
         }
     }
 
-    private void importPointsListFromStorage() {
+    private Marker addPointLocal(LatLng latLng, String title) {
+        Marker addedMarker = mMap.addMarker(new MarkerOptions().position(latLng).title(title));
+        pointsList.put(addedMarker.getTitle(), addedMarker);
+        return addedMarker;
+    }
 
+    private void addPoint(LatLng latLng, String title) {
+        Marker addedMarker = addPointLocal(latLng, title);
+
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        db.delete(NPF.DB_TABLE_POINTS_LIST, "name = ?",
+                new String[] { addedMarker.getTitle() });
+
+        ContentValues cv = new ContentValues();
+        cv.put("name", addedMarker.getTitle());
+        cv.put("lat", latLng.latitude);
+        cv.put("lng", latLng.longitude);
+        cv.put("updated", getCurrentUnixTimestamp());
+        cv.put("synchronized", 0);
+        cv.put("deleted", 0);
+        db.insert(NPF.DB_TABLE_POINTS_LIST, null, cv);
+
+        updatePointStorage();
+    }
+
+    private void renamePoint(Marker marker, String newTitle) {
+        String prevTitle = marker.getTitle();
+        pointsList.remove(prevTitle);
+        marker.setTitle(newTitle);
+        pointsList.put(marker.getTitle(), marker);
+        marker.showInfoWindow();
+
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        db.delete(NPF.DB_TABLE_POINTS_LIST, "name = ?",
+                new String[] { marker.getTitle() });
+
+        ContentValues cv = new ContentValues();
+        cv.put("name", marker.getTitle());
+        cv.put("updated", getCurrentUnixTimestamp());
+
+        db.update(NPF.DB_TABLE_POINTS_LIST, cv, "name = ?", new String[] { prevTitle });
+
+        updatePointStorage();
+    }
+
+    private void removePoint(Marker marker) {
+        pointsList.remove(marker.getTitle());
+        ContentValues cv = new ContentValues();
+        cv.put("deleted", 1);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        db.update(NPF.DB_TABLE_POINTS_LIST, cv, "name = ?",
+                new String[] { marker.getTitle() });
+        marker.remove();
+        updatePointStorage();
+    }
+
+    private long getCurrentUnixTimestamp() {
+        return System.currentTimeMillis() / 1000L;
+    }
+
+    private void importPointsListFromStorage() {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cr = db.query(NPF.DB_TABLE_POINTS_LIST, new String[] {"name", "lat", "lng"},
+                "deleted = 0", null, null, null,null);
+        if (cr.moveToFirst()) {
+            int colLat = cr.getColumnIndex("lat");
+            int colLng = cr.getColumnIndex("lng");
+            int colName = cr.getColumnIndex("name");
+
+            do {
+                double lat = cr.getDouble(colLat);
+                double lng = cr.getDouble(colLng);
+                String title = cr.getString(colName);
+
+                addPointLocal(new LatLng(lat, lng), title);
+            } while (cr.moveToNext());
+        }
+        cr.close();
     }
 
     private void updatePointStorage() {
@@ -87,13 +159,8 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         pointsList = new HashMap<>();
-        importPointsListFromStorage();
-
-        /*LayoutInflater inflater = getLayoutInflater();
-        alertEditTextLayout = inflater.inflate(R.layout.alert_edit_text,
-                (ViewGroup) findViewById(R.id.alertEditTextLayout));
-        alertMarkerMenuLayout = inflater.inflate(R.layout.alert_marker_menu,
-                (ViewGroup) findViewById(R.id.alertMarkerMenuLayout));*/
+        dbHelper = new DBHelper(this);
+        //importPointsListFromStorage();
 
         setTitle("Список точек");
     }
@@ -122,26 +189,6 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
      */
-
-    private void addMarker(LatLng latLng, String title) {
-        Marker addedMarker = mMap.addMarker(new MarkerOptions().position(latLng).title(title));
-        pointsList.put(addedMarker.getTitle(), addedMarker);
-        updatePointStorage();
-    }
-
-    private void renameMarker(Marker marker, String newTitle) {
-        pointsList.remove(marker.getTitle());
-        marker.setTitle(newTitle);
-        pointsList.put(marker.getTitle(), marker);
-        marker.showInfoWindow();
-        updatePointStorage();
-    }
-
-    private void removeMarker(Marker marker) {
-        pointsList.remove(marker.getTitle());
-        marker.remove();
-        updatePointStorage();
-    }
 
     public void setButtonPrimaryColor(Button button) {
         if (button != null) {
@@ -175,7 +222,7 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 //showInfoAlert("Удаление", "Точка удалена");
-                removeMarker(marker);
+                removePoint(marker);
             }
         });
         builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
@@ -251,9 +298,9 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
                 }
 
                 if (marker != null) {
-                    renameMarker(marker, pointTitle);
+                    renamePoint(marker, pointTitle);
                 } else if (latLng != null) {
-                    addMarker(latLng, pointTitle);
+                    addPoint(latLng, pointTitle);
                 }
             }
         });
@@ -278,6 +325,8 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
         /*LatLng sydney = new LatLng(-34, 151);
         mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));*/
+        LatLng moscow = new LatLng(55.75222, 37.61556);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(moscow, (float) 9.5));
 
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
@@ -303,7 +352,7 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
             public void onInfoWindowClick(final Marker marker) {
                 //showWarningAlert("Context", "Нажатие на название маркера");
                 AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                builder.setTitle(marker.getTitle());
+                builder.setTitle("Точка \"" + marker.getTitle() + "\"");
 
                 builder.setPositiveButton("Переименовать", new DialogInterface.OnClickListener() {
                     @Override
@@ -334,5 +383,6 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
                 setButtonPrimaryColor(dlg.getButton(DialogInterface.BUTTON_NEUTRAL));
             }
         });
+        importPointsListFromStorage();
     }
 }
