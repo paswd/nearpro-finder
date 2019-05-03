@@ -16,4 +16,6 @@ public class NPF {
     public static final String DB_NAME = "npfDb";
     public static final String DB_TABLE_PREFIX = "npf_";
     public static final String DB_TABLE_POINTS_LIST = DB_TABLE_PREFIX + "tablePointsList";
+
+    public static final double EARTH_RADIUS_METERS = 6372795.;
 }

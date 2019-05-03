@@ -44,6 +44,12 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
     private GoogleMap mMap;
     private HashMap<String, Marker> pointsList;
     private DBHelper dbHelper;
+    private GeoData geoData;
+
+    //For testing
+    /*private Marker firstMarker;
+    private Marker secondMarker;
+    private int addedCnt = 0;*/
 
     class DBHelper extends SQLiteOpenHelper {
         public DBHelper(Context context) {
@@ -74,6 +80,13 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
         return addedMarker;
     }
 
+    //For testing
+    /*private void printCurrentDistance() {
+        if (addedCnt >= 2) {
+            showInfoAlert("Distance", Double.toString(GeoData.getDistance(firstMarker, secondMarker)) + " meters");
+        }
+    }*/
+
     private void addPoint(LatLng latLng, String title) {
         Marker addedMarker = addPointLocal(latLng, title);
 
@@ -89,6 +102,10 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
         cv.put("synchronized", 0);
         cv.put("deleted", 0);
         db.insert(NPF.DB_TABLE_POINTS_LIST, null, cv);
+        /*secondMarker = firstMarker;
+        firstMarker = addedMarker;
+        addedCnt++;
+        printCurrentDistance();*/
 
         updatePointStorage();
     }
@@ -227,6 +244,7 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
         mapFragment.getMapAsync(this);
         pointsList = new HashMap<>();
         dbHelper = new DBHelper(this);
+        geoData = new GeoData();
         //importPointsListFromStorage();
 
         setTitle("Список точек");
