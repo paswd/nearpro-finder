@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void setViewPropertyList(boolean addToStack) {
-        if (removeNull(fragmentStatusStack.peek()) != NPF.FRAGMENT_PROPERTY_LIST) {
+        if (removeNull(fragmentStatusStack.peek()) != NPF.Fragment.PROPERTY_LIST) {
             fTrans = getFragmentManager().beginTransaction();
             fTrans.replace(R.id.fragmentContainer, propertyListFragment);
             if (addToStack) {
@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
             fTrans.commit();
             //setTitle(R.string.title_property_list);
             //fragmentStatus = NPF.FRAGMENT_PROPERTY_LIST;
-            fragmentStatusStack.push(NPF.FRAGMENT_PROPERTY_LIST);
+            fragmentStatusStack.push(NPF.Fragment.PROPERTY_LIST);
         }
     }
 
@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
     }*/
 
     public void setViewFilter(boolean addToStack) {
-        if (removeNull(fragmentStatusStack.peek()) != NPF.FRAGMENT_FILTER) {
+        if (removeNull(fragmentStatusStack.peek()) != NPF.Fragment.FILTER) {
             fTrans = getFragmentManager().beginTransaction();
             fTrans.replace(R.id.fragmentContainer, filterFragment);
             if (addToStack) {
@@ -73,12 +73,12 @@ public class MainActivity extends AppCompatActivity {
             }
             fTrans.commit();
             //setTitle(R.string.title_filter);
-            fragmentStatusStack.push(NPF.FRAGMENT_FILTER);
+            fragmentStatusStack.push(NPF.Fragment.FILTER);
         }
     }
 
     public void setViewSettings(boolean addToStack) {
-        if (removeNull(fragmentStatusStack.peek()) != NPF.FRAGMENT_SETTINGS) {
+        if (removeNull(fragmentStatusStack.peek()) != NPF.Fragment.SETTINGS) {
             fTrans = getFragmentManager().beginTransaction();
             fTrans.replace(R.id.fragmentContainer, settingsFragment);
             if (addToStack) {
@@ -86,12 +86,12 @@ public class MainActivity extends AppCompatActivity {
             }
             fTrans.commit();
             //setTitle(R.string.title_settings);
-            fragmentStatusStack.push(NPF.FRAGMENT_SETTINGS);
+            fragmentStatusStack.push(NPF.Fragment.SETTINGS);
         }
     }
 
     public void setViewPointsList(boolean addToStack) {
-        if (removeNull(fragmentStatusStack.peek()) != NPF.FRAGMENT_POINTS_LIST) {
+        if (removeNull(fragmentStatusStack.peek()) != NPF.Fragment.POINTS_LIST) {
             fTrans = getFragmentManager().beginTransaction();
             fTrans.replace(R.id.fragmentContainer, pointsListFragment);
             if (addToStack) {
@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
             }
             fTrans.commit();
             //setTitle(R.string.title_settings);
-            fragmentStatusStack.push(NPF.FRAGMENT_POINTS_LIST);
+            fragmentStatusStack.push(NPF.Fragment.POINTS_LIST);
         }
     }
 

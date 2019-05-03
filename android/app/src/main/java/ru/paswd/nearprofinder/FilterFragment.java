@@ -53,7 +53,7 @@ public class FilterFragment extends Fragment {
     public void onResume() {
         super.onResume();
         //nav.setSelectedItemId(R.id.navigation_filter);
-        nav.getMenu().getItem(NPF.MENU_ITEM_FILTER).setChecked(true);
+        nav.getMenu().getItem(NPF.MenuItem.FILTER).setChecked(true);
         getActivity().setTitle(getResources().getString(R.string.title_filter));
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowHomeEnabled(false);

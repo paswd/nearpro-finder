@@ -37,7 +37,7 @@ public class SettingsFragment extends Fragment {
     public void onResume() {
         super.onResume();
         //nav.setSelectedItemId(R.id.navigation_settings);
-        nav.getMenu().getItem(NPF.MENU_ITEM_SETTINGS).setChecked(true);
+        nav.getMenu().getItem(NPF.MenuItem.SETTINGS).setChecked(true);
         getActivity().setTitle(getResources().getString(R.string.title_settings));
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowHomeEnabled(false);

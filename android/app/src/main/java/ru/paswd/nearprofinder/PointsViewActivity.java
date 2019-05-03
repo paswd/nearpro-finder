@@ -42,7 +42,7 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
 
     final Context context = this;
     private GoogleMap mMap;
-    private HashMap<String, Marker> pointsList;
+    //private HashMap<String, Marker> pointsList;
     private DBHelper dbHelper;
     private GeoData geoData;
 
@@ -54,12 +54,12 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
     class DBHelper extends SQLiteOpenHelper {
         public DBHelper(Context context) {
             // конструктор суперкласса
-            super(context, NPF.DB_NAME, null, 1);
+            super(context, NPF.DB.NAME, null, 1);
         }
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            db.execSQL("CREATE TABLE " + NPF.DB_TABLE_POINTS_LIST + " (" +
+            db.execSQL("CREATE TABLE " + NPF.DB.TABLE_POINTS_LIST + " (" +
                     "name text primary key," +
                     "lat real," +
                     "lng real," +
@@ -76,7 +76,8 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
 
     private Marker addPointLocal(LatLng latLng, String title) {
         Marker addedMarker = mMap.addMarker(new MarkerOptions().position(latLng).title(title));
-        pointsList.put(addedMarker.getTitle(), addedMarker);
+        //pointsList.put(addedMarker.getTitle(), addedMarker);
+        geoData.addPoint(addedMarker);
         return addedMarker;
     }
 
@@ -91,7 +92,7 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
         Marker addedMarker = addPointLocal(latLng, title);
 
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-        db.delete(NPF.DB_TABLE_POINTS_LIST, "name = ?",
+        db.delete(NPF.DB.TABLE_POINTS_LIST, "name = ?",
                 new String[] { addedMarker.getTitle() });
 
         ContentValues cv = new ContentValues();
@@ -101,7 +102,7 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
         cv.put("updated", getCurrentUnixTimestamp());
         cv.put("synchronized", 0);
         cv.put("deleted", 0);
-        db.insert(NPF.DB_TABLE_POINTS_LIST, null, cv);
+        db.insert(NPF.DB.TABLE_POINTS_LIST, null, cv);
         /*secondMarker = firstMarker;
         firstMarker = addedMarker;
         addedCnt++;
@@ -112,30 +113,32 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
 
     private void renamePoint(Marker marker, String newTitle) {
         String prevTitle = marker.getTitle();
-        pointsList.remove(prevTitle);
+        /*pointsList.remove(prevTitle);
         marker.setTitle(newTitle);
-        pointsList.put(marker.getTitle(), marker);
+        pointsList.put(marker.getTitle(), marker);*/
+        geoData.renamePoint(marker, newTitle);
         marker.showInfoWindow();
 
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-        db.delete(NPF.DB_TABLE_POINTS_LIST, "name = ?",
+        db.delete(NPF.DB.TABLE_POINTS_LIST, "name = ?",
                 new String[] { marker.getTitle() });
 
         ContentValues cv = new ContentValues();
         cv.put("name", marker.getTitle());
         cv.put("updated", getCurrentUnixTimestamp());
 
-        db.update(NPF.DB_TABLE_POINTS_LIST, cv, "name = ?", new String[] { prevTitle });
+        db.update(NPF.DB.TABLE_POINTS_LIST, cv, "name = ?", new String[] { prevTitle });
 
         updatePointStorage();
     }
 
     private void removePoint(Marker marker) {
-        pointsList.remove(marker.getTitle());
+        //pointsList.remove(marker.getTitle());
+        geoData.removePoint(marker);
         ContentValues cv = new ContentValues();
         cv.put("deleted", 1);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-        db.update(NPF.DB_TABLE_POINTS_LIST, cv, "name = ?",
+        db.update(NPF.DB.TABLE_POINTS_LIST, cv, "name = ?",
                 new String[] { marker.getTitle() });
         marker.remove();
         updatePointStorage();
@@ -143,12 +146,13 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
 
     private void clearAllPoints() {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-        db.delete(NPF.DB_TABLE_POINTS_LIST, null, null);
+        db.delete(NPF.DB.TABLE_POINTS_LIST, null, null);
 
-        for (Marker i : pointsList.values()) {
+        for (Marker i : geoData.getPointsValues()) {
             i.remove();
         }
-        pointsList.clear();
+        //pointsList.clear();
+        geoData.clearAllPoints();
     }
 
     private long getCurrentUnixTimestamp() {
@@ -157,7 +161,7 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
 
     private void importPointsListFromStorage() {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        Cursor cr = db.query(NPF.DB_TABLE_POINTS_LIST, new String[] {"name", "lat", "lng"},
+        Cursor cr = db.query(NPF.DB.TABLE_POINTS_LIST, new String[] {"name", "lat", "lng"},
                 "deleted = 0", null, null, null,null);
         if (cr.moveToFirst()) {
             int colLat = cr.getColumnIndex("lat");
@@ -242,7 +246,7 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        pointsList = new HashMap<>();
+        //pointsList = new HashMap<>();
         dbHelper = new DBHelper(this);
         geoData = new GeoData();
         //importPointsListFromStorage();
@@ -384,7 +388,8 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
                         return;
                     }
                 }
-                if (pointsList.containsKey(pointTitle)) {
+                //if (pointsList.containsKey(pointTitle)) {
+                if (geoData.isPointExists(pointTitle)) {
                     showInfoAlert("Отказано", "Точка с таким названием существует");
                             /*Button btn = dlg.getButton(DialogInterface.BUTTON_POSITIVE);
                             if (btn != null) {
@@ -392,7 +397,7 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
                             }*/
                     return;
                 }
-
+                
                 if (marker != null) {
                     renamePoint(marker, pointTitle);
                 } else if (latLng != null) {
@@ -501,7 +506,7 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
                 onBackPressed();
                 return true;
             case R.id.action_points_clear:
-                if (pointsList.isEmpty()) {
+                if (geoData.isPointsListEmpty()) {
                     showInfoAlert("Очистка карты", "Карта уже была очищена, или на неё не было установлено ни одной точки");
                 } else {
                     showMapClearAlert();
