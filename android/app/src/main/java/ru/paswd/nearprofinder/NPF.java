@@ -27,6 +27,14 @@ public class NPF {
 
     public static final class Geo {
         public static final double RADIUS_METERS = 6372795.;
+        public static final double ABS_LAT_MAX = 90.;
+        public static final double ABS_LNG_MAX = 180.;
+
+        public static final class Optimization {
+            public static final double DEGREE_STEP_BASIC = 1.;
+            public static final double DEGREE_STEP_EPS = .00001;
+
+        }
     }
 
     public static final class MethodResult {
@@ -34,5 +42,6 @@ public class NPF {
         public static final int EMPTY = 1;
         public static final int EXSISTS = 2;
         public static final int NOT_EXSISTS = 3;
+        public static final int INCORRECT_DATA = 4;
     }
 }

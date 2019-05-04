@@ -28,6 +28,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -45,6 +46,7 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
     //private HashMap<String, Marker> pointsList;
     private DBHelper dbHelper;
     private GeoData geoData;
+    private Marker optimalPoint = null;
 
     //For testing
     /*private Marker firstMarker;
@@ -103,10 +105,14 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
         cv.put("synchronized", 0);
         cv.put("deleted", 0);
         db.insert(NPF.DB.TABLE_POINTS_LIST, null, cv);
+
+        //For testing
         /*secondMarker = firstMarker;
         firstMarker = addedMarker;
         addedCnt++;
         printCurrentDistance();*/
+
+        refreshOptimalPoint();
 
         updatePointStorage();
     }
@@ -141,6 +147,7 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
         db.update(NPF.DB.TABLE_POINTS_LIST, cv, "name = ?",
                 new String[] { marker.getTitle() });
         marker.remove();
+        refreshOptimalPoint();
         updatePointStorage();
     }
 
@@ -153,6 +160,7 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
         }
         //pointsList.clear();
         geoData.clearAllPoints();
+        refreshOptimalPoint();
     }
 
     private long getCurrentUnixTimestamp() {
@@ -397,7 +405,7 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
                             }*/
                     return;
                 }
-                
+
                 if (marker != null) {
                     renamePoint(marker, pointTitle);
                 } else if (latLng != null) {
@@ -490,6 +498,10 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
             }
         });
         importPointsListFromStorage();
+        refreshOptimalPoint();
+        /*LatLng ln = new LatLng(10., 350.);
+
+        addPoint(GeoData.coordinateNormalize(ln), "Overload");*/
     }
 
     @Override
@@ -519,5 +531,22 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
 
     public void onBackPressed() {
         finish();
+    }
+
+    private void removeOptimalPoint() {
+        if (optimalPoint != null) {
+            optimalPoint.remove();
+        }
+    }
+
+    private void refreshOptimalPoint() {
+        removeOptimalPoint();
+        if (geoData.getPointCount() >= 2) {
+            LatLng pnt = geoData.getOptimalPoint();
+            optimalPoint = mMap.addMarker(new MarkerOptions()
+                    .position(pnt).title("Optimal")
+                    .icon(BitmapDescriptorFactory.defaultMarker(228)));
+            //showInfoAlert("Optimal pos");
+        }
     }
 }
