@@ -26,7 +26,7 @@ public class NPF {
     }
 
     public static final class Geo {
-        public static final double RADIUS_METERS = 6372795.;
+        public static final double EARTH_RADIUS_METERS = 6372795.;
         public static final double ABS_LAT_MAX = 90.;
         public static final double ABS_LNG_MAX = 180.;
 

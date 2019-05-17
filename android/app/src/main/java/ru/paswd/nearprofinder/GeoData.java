@@ -46,7 +46,7 @@ public class GeoData {
 
         double angularDiff = Math.atan(numerator / denominator);
 
-        return angularDiff * NPF.Geo.RADIUS_METERS;
+        return angularDiff * NPF.Geo.EARTH_RADIUS_METERS;
     }
 
 
