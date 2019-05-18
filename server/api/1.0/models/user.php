@@ -61,7 +61,7 @@ class User {
 		}
 
 		if ($cnt == 0) {
-			$db->close();
+			$this->db->close();
 			die(getRespond(false, 1, $this->errorList[1], NULL));
 		}
 
@@ -174,5 +174,11 @@ class User {
 
 	function logout() {
 		$this->destroySession($this->accessToken);
+	}
+
+	function checkSession($token) {
+		if (!$this->isValidSession($token)) {
+			die(getRespond(false, 6, $this->errorList[6], NULL));
+		}
 	}
 }
