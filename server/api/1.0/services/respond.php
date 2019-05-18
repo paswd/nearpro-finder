@@ -8,5 +8,5 @@ function getRespond($status, $errorNum, $errorMsg, $data) {
 		'data' => $data
 	];
 
-	return json_encode($data);
+	return json_encode($data, JSON_UNESCAPED_UNICODE);
 }

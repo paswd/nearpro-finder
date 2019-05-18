@@ -26,6 +26,7 @@ class DB {
 			$this->password,
 			$this->database
 		);
+		mysqli_set_charset($this->connection, 'utf8');
 	}
 
 	function close() {
