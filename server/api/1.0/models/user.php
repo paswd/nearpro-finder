@@ -31,6 +31,10 @@ class User {
 		$this->db = new DB;
 	}
 
+	function getTimeout() {
+		return date('U') + $this->globalParams['session_timeout'];
+	}
+
 	function setUserData($_login, $_password, $_email) {
 		$this->login = $_login;
 		$this->password = $_password;
@@ -46,13 +50,15 @@ class User {
 
 	}
 
+
 	function setAccessToken($_access_token) {
 
 		$this->accessToken = $_access_token;
 
 		$this->db->connect();
 
-		$sessionSql = $this->db->query('SELECT * FROM `sessions` WHERE `access_token`="'.$this->accessToken.'"');
+		$sessionSql = $this->db->query('SELECT * FROM `sessions` WHERE `access_token`="'.$this->accessToken.'"
+			AND (`timeout`>'.date('U').' OR `timeout`=0)');
 
 		$cnt = 0;
 		while ($row = mysqli_fetch_object($sessionSql)) {
@@ -64,6 +70,10 @@ class User {
 			$this->db->close();
 			die(getRespond(false, 1, $this->errorList[1], NULL));
 		}
+
+		$this->db->query('UPDATE `sessions` SET `timeout`='.
+			$this->getTimeout()
+			.' WHERE `access_token`="'.$this->accessToken.'"');
 
 		$userSql = $this->db->query('SELECT * FROM `users` WHERE `id`='.$this->id);
 		$row = mysqli_fetch_object($userSql);
@@ -97,7 +107,8 @@ class User {
 			$generated = md5(sha1(rand()));
 
 			if (!$this->db->isExists('sessions', 'access_token', $generated)) {
-				$this->db->query('INSERT INTO `sessions` VALUES(NULL, '.$this->id.', "'.$generated.'")');
+				$this->db->query('INSERT INTO `sessions` VALUES(NULL, '.$this->id.', "'.$generated.'",
+					'.date('U').', '.$this->getTimeout().')');
 				$this->accessToken = $generated;
 				break;
 			}
@@ -123,6 +134,17 @@ class User {
 		$this->db->close();
 
 		return $res;
+
+		/*$this->accessToken = $_access_token;
+
+		$this->db->connect();
+
+		if (!$this->db->isExists('sessions', 'access_token', $this->accessToken)) {
+			$this->db->close();
+			die(getRespond(false, 1, $this->errorList[1], NULL));
+		}
+
+		$this->db->close();*/
 	}
 
 	function isEmpty() {
@@ -174,11 +196,5 @@ class User {
 
 	function logout() {
 		$this->destroySession($this->accessToken);
-	}
-
-	function checkSession($token) {
-		if (!$this->isValidSession($token)) {
-			die(getRespond(false, 6, $this->errorList[6], NULL));
-		}
 	}
 }
