@@ -31,13 +31,17 @@ class User {
 		$this->db = new DB;
 	}
 
+	function encryptPassword($password) {
+		return $password;
+	}
+
 	function getTimeout() {
 		return date('U') + $this->globalParams['session_timeout'];
 	}
 
 	function setUserData($_login, $_password, $_email) {
 		$this->login = $_login;
-		$this->password = $_password;
+		$this->password = encryptPassword($_password);
 		$this->email = $_email;
 
 		$this->db->connect();
@@ -48,6 +52,16 @@ class User {
 
 		$this->db->close();
 
+	}
+
+	function update() {
+		$this->db->connect();
+		$userSql = $this->db->query('SELECT * FROM `users` WHERE `id`='.$this->id);
+		$row = mysqli_fetch_object($userSql);
+		$this->login = $row->name;
+		$this->password = $row->password;
+		$this->email = $row->email;
+		$this->db->close();
 	}
 
 
@@ -61,8 +75,10 @@ class User {
 			AND (`timeout`>'.date('U').' OR `timeout`=0)');
 
 		$cnt = 0;
+		$sessionId = 0;
 		while ($row = mysqli_fetch_object($sessionSql)) {
-			$this->id = $row->id;
+			$sessionId = $row->id;
+			$this->id = $row->user_id;
 			$cnt++;
 		}
 
@@ -75,13 +91,9 @@ class User {
 			$this->getTimeout()
 			.' WHERE `access_token`="'.$this->accessToken.'"');
 
-		$userSql = $this->db->query('SELECT * FROM `users` WHERE `id`='.$this->id);
-		$row = mysqli_fetch_object($userSql);
-		$this->login = $row->name;
-		$this->password = $row->password;
-		$this->email = $row->email;
-
 		$this->db->close();
+
+		$this->update();
 	}
 
 	function getLogin() {
@@ -94,11 +106,6 @@ class User {
 
 	function getEmail() {
 		return $this->email;
-	}
-
-
-	function enctyptPassword() {
-		return $this->password;
 	}
 
 	function createSession() {
@@ -156,7 +163,7 @@ class User {
 		$res = $this->db->query('SELECT * FROM `users` WHERE `name`="'.$this->login.'"');
 		$row = mysqli_fetch_object($res);
 
-		if ($this->enctyptPassword() != $row->password) {
+		if ($this->password != $row->password) {
 			return getRespond(false, 5, $this->errorList[5], NULL);
 		}
 
@@ -186,7 +193,7 @@ class User {
 		}
 
 		$this->db->query('INSERT INTO `users` VALUES(
-			NULL, "'.$this->login.'", "'.$this->enctyptPassword().'", "'.$this->email.'"
+			NULL, "'.$this->login.'", "'.$this->password.'", "'.$this->email.'"
 		)');
 		$this->db->close();
 
@@ -196,5 +203,23 @@ class User {
 
 	function logout() {
 		$this->destroySession($this->accessToken);
+	}
+
+	function edit($email) {
+		$this->db->connect();
+		
+		$this->db->query('UPDATE `users` SET `email`="'.$email.'" WHERE `name`="'.$this->login.'"');
+		$this->db->close();
+
+		$this->update();
+	}
+
+	function changePassword($oldPassword, $newPassword) {
+		if ($this->encryptPassword($oldPassword) != $this->password) {
+			die(getRespond(false, 7, $this->errorList[7], NULL));
+		}
+		$enctypted = $this->encryptPassword($newPassword);
+		$this->db->query('UPDATE `users` SET `password`="'.$encrypted.'" WHERE `name`="'.$this->login.'"');
+		$this->password = $enctypted;
 	}
 }
