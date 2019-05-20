@@ -1,6 +1,6 @@
 <?php
 require_once('services/db.php');
-require_once('models/regionlist.php');
+require_once('models/region_list.php');
 
 class CountryList {
 	private $db;
