@@ -10,3 +10,11 @@ function getRespond($status, $errorNum, $errorMsg, $data) {
 
 	return json_encode($data, JSON_UNESCAPED_UNICODE);
 }
+
+function checkAccessToken($token) {
+	require('config/main.php');
+
+	if (empty($token) || $token != $GLOBAL_PARAMS['access_token']) {
+		die(getRespond(false, 1, $ERROR_LIST[1], NULL));
+	}
+}

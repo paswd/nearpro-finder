@@ -39,17 +39,21 @@ class User {
 	}
 
 	function encryptPassword($password) {
-		return $password;
+		return md5(sha1($password));
 	}
 
 	function getTimeout() {
 		return date('U') + $this->globalParams['session_timeout'];
 	}
 
-	function setUserData($_login, $_password, $_email) {
+	function setUserData($_login, $_password, $_email, $isRegister = false) {
 		$this->login = $_login;
 		$this->password = $this->encryptPassword($_password);
 		$this->email = $_email;
+
+		if ($isRegister) {
+			return;
+		}
 
 		$this->db->connect();
 
@@ -205,7 +209,9 @@ class User {
 			$this->db->close();
 			return getRespond(false, 4, $this->errorList[4], '');
 		}
-
+		// die('INSERT INTO `users` VALUES(
+		// 	NULL, "'.$this->login.'", "'.$this->password.'", "'.$this->email.'"
+		// )');
 		$this->db->query('INSERT INTO `users` VALUES(
 			NULL, "'.$this->login.'", "'.$this->password.'", "'.$this->email.'"
 		)');

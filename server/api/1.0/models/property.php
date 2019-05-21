@@ -53,6 +53,9 @@ class Property {
 	}
 
 	function convertWhereToString($whereArr) {
+		if (count($whereArr) == 0) {
+			return '';
+		}
 		$res = ' WHERE ';
 		$first = true;
 		foreach ($whereArr as $value) {
@@ -92,12 +95,15 @@ class Property {
 			$whereArr[] = '`price` <= '.$priceMax;
 		}
 
-		if ($isLocality && $radius > 0) {
+		if ($isLocality) {
+			$orderby = ' ORDER BY `distance`';
 			$dist = $this->getDistanceSql($lat, $lng);
 			$distList = '((SELECT `id` AS `property_id`, '.$dist.' AS `distance` FROM `property`) AS `dist_list`)';
 			$join .= ' INNER JOIN '.$distList.' ON `dist_list`.`property_id` = `property`.`id`';
-			$whereArr[] = ' `distance` < '.$radius;
-			$orderby = ' ORDER BY `distance`';
+			
+			if ($radius > 0) {
+				$whereArr[] = ' `distance` < '.$radius;
+			}
 		}
 		//die('SELECT * FROM `property` INNER JOIN '.$distList.' ON `dist_list`.`property_id` = `property`.`id`');
 		//die('SELECT * FROM `property`'.$join.$where);
@@ -123,7 +129,7 @@ class Property {
 				'address' => $row->address,
 				'description' => $row->description,
 			];
-			if ($isLocality && $radius > 0) {
+			if ($isLocality) {
 				$data['distance'] = $row->distance;
 			}
 			$list[] = $data;

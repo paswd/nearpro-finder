@@ -8,7 +8,9 @@ require_once('services/respond.php');
 $postData = file_get_contents('php://input');
 $received = json_decode($postData, true);
 
-$token = htmlspecialchars($received['access_token']);
+checkAccessToken($received['access_token']);
+
+$token = htmlspecialchars($received['session_token']);
 
 $user = new User;
 $user->setAccessToken($token);
