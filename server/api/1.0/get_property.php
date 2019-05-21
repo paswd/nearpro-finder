@@ -19,13 +19,26 @@ $lat = $received['lat'];
 $lng = $received['lng'];
 $radius = $received['radius'];
 
+$country = $received['country'];
+$region = $received['region'];
+$type = $received['type'];
+$priceMin = $received['price_min'];
+$priceMax = $received['price_max'];
+
+settype($country, 'integer');
+settype($region, 'integer');
+settype($type, 'integer');
+settype($priceMin, 'double');
+settype($priceMax, 'double');
+
 settype($lat, 'double');
 settype($lng, 'double');
 settype($radius, 'double');
 
 $property = new Property;
 
-$propertyData = $property->get($isLocality, $lat, $lng, $radius);
+$propertyData = $property->get($country, $region, $type, $priceMin, $priceMax,
+	$isLocality, $lat, $lng, $radius);
 
 die(getRespond(true, 0, '', $propertyData));
 

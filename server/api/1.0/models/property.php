@@ -16,17 +16,21 @@ class Property {
 		$this->db = new DB;
 	}
 
+	function convertDegreeToRadianSql($angle) {
+		return '('.$angle.' * PI() / 180)';
+	}
+
 	function getDistanceSql($_lat, $_lng) {
 		$latDbAngle = '`lat`';
 		$lngDbAngle = '`lng`';
 
 		//$latDbAngle = 55.849490496203096;
 		//$lngDbAngle = 37.51476265490055;
-		$latDb = '('.$latDbAngle.' * PI() / 180)';
-		$lngDb = '('.$lngDbAngle.' * PI() / 180)';
+		$latDb = $this->convertDegreeToRadianSql($latDbAngle);
+		$lngDb = $this->convertDegreeToRadianSql($lngDbAngle);
 
-		$lat = '('.$_lat.' * PI() / 180)';
-		$lng = '('.$_lng.' * PI() / 180)';
+		$lat = $this->convertDegreeToRadianSql($_lat);
+		$lng = $this->convertDegreeToRadianSql($_lng);
 
 		$lngDiff = 'abs('.$lng.' - '.$lngDb.')';
 
@@ -48,21 +52,51 @@ class Property {
 		return '('.$angularDiff.' * '.$this->globalParams['geo']['earth_radius'].')';
 	}
 
-	function get($isLocality = false, $lat = 0, $lng = 0, $radius = 0) {
+	function convertWhereToString($whereArr) {
+		$res = ' WHERE ';
+		$first = true;
+		foreach ($whereArr as $value) {
+			if (!$first) {
+				$res .= ' AND ';
+			}
+			$res .= $value;
+			$first = false;
+		}
+
+		return $res;
+	}
+
+	function get($country = 0, $region = 0, $type = 0, $priceMin = 0, $priceMax = 0,
+			$isLocality = false, $lat = 0, $lng = 0, $radius = 0) {
 		$this->db->connect();
 		//$res = $this->db->query('SELECT * FROM `property_types`');
 
-
-		$where = '';
+		$whereArr = [];
 		$dist = '';
-		$join = '';
+		$join = ' INNER JOIN (SELECT `id` AS `region_id`, `country_id` FROM `regions`) AS `regions_list` ON `property`.`region` = `regions_list`.`region_id`';
 		$orderby = ' ORDER BY `id`';
+
+		if ($country > 0) {
+			$whereArr[] = '`country_id` = '.$country;
+		}
+		if ($region > 0) {
+			$whereArr[] = '`region` = '.$region;
+		}
+		if ($type > 0) {
+			$whereArr[] = '`type` = '.$type;
+		}
+		if ($priceMin > 0) {
+			$whereArr[] = '`price` >= '.$priceMin;
+		}
+		if ($priceMax > 0) {
+			$whereArr[] = '`price` <= '.$priceMax;
+		}
 
 		if ($isLocality && $radius > 0) {
 			$dist = $this->getDistanceSql($lat, $lng);
 			$distList = '((SELECT `id` AS `property_id`, '.$dist.' AS `distance` FROM `property`) AS `dist_list`)';
-			$join = ' INNER JOIN '.$distList.' ON `dist_list`.`property_id` = `property`.`id`';
-			$where = ' WHERE `distance` < '.$radius;
+			$join .= ' INNER JOIN '.$distList.' ON `dist_list`.`property_id` = `property`.`id`';
+			$whereArr[] = ' `distance` < '.$radius;
 			$orderby = ' ORDER BY `distance`';
 		}
 		//die('SELECT * FROM `property` INNER JOIN '.$distList.' ON `dist_list`.`property_id` = `property`.`id`');
@@ -71,7 +105,8 @@ class Property {
 		//die('SELECT '.$where.' as `result`');
 
 		//die('SELECT * FROM `property`'.$where);
-
+		$where = $this->convertWhereToString($whereArr);
+		//die('SELECT * FROM `property`'.$join.$where.$orderby);
 		$res = $this->db->query('SELECT * FROM `property`'.$join.$where.$orderby);
 	
 
