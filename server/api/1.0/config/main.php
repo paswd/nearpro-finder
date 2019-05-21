@@ -5,7 +5,8 @@ $GLOBAL_PARAMS = [
 	'session_timeout' => 15 * 60,
 	'geo' => [
 		'earth_radius' => 6372795
-	]
+	],
+	'property_img_dir' => '/static/images/property/'
 ];
 
 $ERROR_LIST = [

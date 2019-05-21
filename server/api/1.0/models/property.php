@@ -4,6 +4,8 @@ require_once('services/db.php');
 
 class Property {
 	private $db;
+	private $globalParams;
+	private $errorList;
 
 	function setGlobalParams() {
 		require('config/main.php');
@@ -122,7 +124,7 @@ class Property {
 				'name' => $row->name,
 				'price' => $row->price,
 				'type' => $row->type,
-				'img_src' => '/static/images/property/'.$row->img_src,
+				'img_src' => $this->globalParams['property_img_dir'].$row->img_src,
 				'lat' => $row->lat,
 				'lng' => $row->lng,
 				'region' => $row->region,
