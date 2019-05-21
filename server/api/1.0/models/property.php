@@ -122,7 +122,7 @@ class Property {
 				'name' => $row->name,
 				'price' => $row->price,
 				'type' => $row->type,
-				'img_src' => $row->img_src,
+				'img_src' => '/static/images/property/'.$row->img_src,
 				'lat' => $row->lat,
 				'lng' => $row->lng,
 				'region' => $row->region,
