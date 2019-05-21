@@ -26,9 +26,16 @@ class User {
 		$this->errorList = $ERROR_LIST;
 	}
 
+	function sessionCleaner() {
+		$this->db->connect();
+		$this->db->query('DELETE FROM `sessions` WHERE `timeout` < '.date('U'));
+		$this->db->close();
+	}
+
 	function __construct() {
 		$this->setGlobalParams();
 		$this->db = new DB;
+		$this->sessionCleaner();
 	}
 
 	function encryptPassword($password) {
@@ -61,6 +68,13 @@ class User {
 		$this->login = $row->name;
 		$this->password = $row->password;
 		$this->email = $row->email;
+		$this->db->close();
+	}
+
+	function registerFollowing($propertyId) {
+		$this->db->connect();
+		$this->db->query('INSERT INTO `user_followings` VALUES(NULL,
+			'.$this->id.', '.$propertyId.', '.date('U').')');
 		$this->db->close();
 	}
 
