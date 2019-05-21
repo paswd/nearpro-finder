@@ -17,13 +17,13 @@ class Property {
 	}
 
 	function getDistanceSql($_lat, $_lng) {
-		$latDb = '`lat`';
-		$lngDb = '`lng`';
+		$latDbAngle = '`lat`';
+		$lngDbAngle = '`lng`';
 
 		//$latDbAngle = 55.849490496203096;
 		//$lngDbAngle = 37.51476265490055;
-		//$latDb = '('.$latDbAngle.' * PI() / 180)';
-		//$lngDb = '('.$lngDbAngle.' * PI() / 180)';
+		$latDb = '('.$latDbAngle.' * PI() / 180)';
+		$lngDb = '('.$lngDbAngle.' * PI() / 180)';
 
 		$lat = '('.$_lat.' * PI() / 180)';
 		$lng = '('.$_lng.' * PI() / 180)';
@@ -43,7 +43,7 @@ class Property {
 		$denominator = '(sin('.$lat.') * sin('.$latDb.') +
 				cos('.$lat.') * cos('.$latDb.') * cos('.$lngDiff.'))';
 
-		$angularDiff = 'atan('.$numerator.' / '.$denominator.')';
+		$angularDiff = 'abs(atan('.$numerator.' / '.$denominator.'))';
 
 		return '('.$angularDiff.' * '.$this->globalParams['geo']['earth_radius'].')';
 	}
@@ -54,17 +54,25 @@ class Property {
 
 
 		$where = '';
+		$dist = '';
+		$join = '';
+		$orderby = ' ORDER BY `id`';
 
 		if ($isLocality && $radius > 0) {
 			$dist = $this->getDistanceSql($lat, $lng);
-			$where = ' WHERE '.$dist.' < '.$radius;
+			$distList = '((SELECT `id` AS `property_id`, '.$dist.' AS `distance` FROM `property`) AS `dist_list`)';
+			$join = ' INNER JOIN '.$distList.' ON `dist_list`.`property_id` = `property`.`id`';
+			$where = ' WHERE `distance` < '.$radius;
+			$orderby = ' ORDER BY `distance`';
 		}
+		//die('SELECT * FROM `property` INNER JOIN '.$distList.' ON `dist_list`.`property_id` = `property`.`id`');
+		//die('SELECT * FROM `property`'.$join.$where);
 
 		//die('SELECT '.$where.' as `result`');
 
 		//die('SELECT * FROM `property`'.$where);
 
-		$res = $this->db->query('SELECT * FROM `property`'.$where);
+		$res = $this->db->query('SELECT * FROM `property`'.$join.$where.$orderby);
 	
 
 		while ($row = mysqli_fetch_object($res)) {
@@ -78,8 +86,11 @@ class Property {
 				'lng' => $row->lng,
 				'region' => $row->region,
 				'address' => $row->address,
-				'description' => $row->description 
+				'description' => $row->description,
 			];
+			if ($isLocality && $radius > 0) {
+				$data['distance'] = $row->distance;
+			}
 			$list[] = $data;
 		}
 		$this->db->close();

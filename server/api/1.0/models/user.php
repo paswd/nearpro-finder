@@ -41,7 +41,7 @@ class User {
 
 	function setUserData($_login, $_password, $_email) {
 		$this->login = $_login;
-		$this->password = encryptPassword($_password);
+		$this->password = $this->encryptPassword($_password);
 		$this->email = $_email;
 
 		$this->db->connect();
@@ -207,7 +207,7 @@ class User {
 
 	function edit($email) {
 		$this->db->connect();
-		
+
 		$this->db->query('UPDATE `users` SET `email`="'.$email.'" WHERE `name`="'.$this->login.'"');
 		$this->db->close();
 

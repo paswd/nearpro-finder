@@ -9,23 +9,13 @@ $postData = file_get_contents('php://input');
 $received = json_decode($postData, true);
 
 $token = htmlspecialchars($received['access_token']);
+$oldPassword = htmlspecialchars($received['old_password']);
+$newPassword = htmlspecialchars($received['new_password']);
 
 $user = new User;
 $user->setAccessToken($token);
 //die(getRespond(true, "", ""));
-
-$isLocality = ($received['is_locality'] == '1' ? true : false);
-$lat = $received['lat'];
-$lng = $received['lng'];
-$radius = $received['radius'];
-
-settype($lat, 'double');
-settype($lng, 'double');
-settype($radius, 'double');
-
-$property = new Property;
-
-$propertyData = $property->get($isLocality, $lat, $lng, $radius);
+$user->changePassword($oldPassword, $newPassword);
 
 die(getRespond(true, 0, '', $propertyData));
 
