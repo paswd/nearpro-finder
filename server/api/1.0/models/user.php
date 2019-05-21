@@ -217,8 +217,8 @@ class User {
 		)');
 		$this->db->close();
 
-		return $this->auth();
-		//return getRespond(true, 0, '', $res);
+		//return $this->auth();
+		return getRespond(true, 0, '', $res);
 	}
 
 	function logout() {

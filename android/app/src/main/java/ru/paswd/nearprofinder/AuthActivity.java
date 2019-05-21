@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 public class AuthActivity extends AppCompatActivity {
 
@@ -25,10 +26,23 @@ public class AuthActivity extends AppCompatActivity {
                 authSuccess();
             }
         });
+
+        TextView regHref = (TextView) findViewById(R.id.authGoReg);
+        regHref.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                register();
+            }
+        });
     }
 
     private void authSuccess() {
         startActivity(new Intent(this, MainActivity.class));
         finish();
+    }
+
+    private void register() {
+        startActivity(new Intent(this, RegisterActivity.class));
+        //finish();
     }
 }

@@ -80,4 +80,9 @@ public class PropertyListFragment extends Fragment {
             propertyItems.add(new PropertyItem("Объект " + i, "Описание", "Адрес", 100000 * i));
         }
     }
+
+    /*void fillPropertyList() {
+        propertyItems.clear();
+
+    }*/
 }

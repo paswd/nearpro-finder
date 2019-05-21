@@ -9,9 +9,9 @@ $received = json_decode($postData, true);
 
 checkAccessToken($received['access_token']);
 
-if (empty($received['access_token']) || $received['access_token'] != $GLOBAL_PARAMS['access_token']) {
-	die(getRespond(false, 1, $ERROR_LIST[1], NULL));
-}
+// if (empty($received['access_token']) || $received['access_token'] != $GLOBAL_PARAMS['access_token']) {
+// 	die(getRespond(false, 1, $ERROR_LIST[1], NULL));
+// }
 //die(getRespond(true, "", ""));
 
 $user = new User;
