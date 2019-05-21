@@ -10,6 +10,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import ru.paswd.nearprofinder.config.NPF;
+
 public class SettingsFragment extends Fragment {
     private BottomNavigationView nav;
     private View view;

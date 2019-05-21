@@ -1,38 +1,35 @@
-package ru.paswd.nearprofinder;
+package ru.paswd.nearprofinder.api;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.DataOutputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 
-import javax.xml.transform.Result;
+import ru.paswd.nearprofinder.config.NPF;
 
 
-public class API extends AsyncTask<String, String, String> {
+public class ApiManager extends AsyncTask<String, String, String> {
     private Context context;
     private String apiHref;
     private JSONObject sendObject;
     //private JSONObject result;
     private OnTaskCompleted listener;
 
-    public API(Context ctx, OnTaskCompleted _listener) {
+    boolean isError;
+
+    public ApiManager(Context ctx, OnTaskCompleted _listener) {
         context = ctx;
         listener = _listener;
+        isError = false;
         //apiHref = _apiHref;
         //jsonObject = request;
     }
@@ -45,8 +42,22 @@ public class API extends AsyncTask<String, String, String> {
             sendObject.put("login", login);
             sendObject.put("password", password);
             sendObject.put("email", email);
-        } catch (JSONException ignored) {}
+        } catch (JSONException ignored) {
+            isError = true;
+        }
 
+    }
+
+    public void setMsgAuth(String login, String password) {
+        try {
+            apiHref = NPF.Server.API.AUTH;
+            sendObject = new JSONObject();
+            sendObject.put("access_token", NPF.Server.ACCESS_TOKEN);
+            sendObject.put("login", login);
+            sendObject.put("password", password);
+        } catch (JSONException ignored) {
+            isError = true;
+        }
     }
 
     /*public JSONObject getResult() {
@@ -67,6 +78,9 @@ public class API extends AsyncTask<String, String, String> {
     protected String doInBackground(String... params) {
         if (!checkNetworkConnection()) {
             return "{\"status\":0,\"error_num\":-1,\"error_msg\":\"No network connection\",\"data\":\"\"}";
+        }
+        if (isError) {
+            return "{\"status\":0,\"error_num\":-2,\"error_msg\":\"Unknown error\",\"data\":\"\"}";
         }
 
         return send();

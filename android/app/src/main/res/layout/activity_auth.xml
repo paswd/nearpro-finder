@@ -34,6 +34,7 @@
             android:text="Логин" />
 
         <EditText
+            android:id="@+id/authLogin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textPersonName"
@@ -46,6 +47,7 @@
             android:text="Пароль" />
 
         <EditText
+            android:id="@+id/authPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textPassword"

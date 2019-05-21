@@ -58,6 +58,7 @@ class User {
 		$this->db->connect();
 
 		if (!$this->db->isExists('users', 'name', $this->login)) {
+			$this->db->close();
 			die(getRespond(false, 5, $this->errorList[5], NULL));
 		}
 

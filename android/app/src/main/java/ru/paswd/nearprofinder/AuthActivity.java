@@ -6,7 +6,16 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import ru.paswd.nearprofinder.api.ApiManager;
+import ru.paswd.nearprofinder.api.OnTaskCompleted;
+import ru.paswd.nearprofinder.config.NPF;
 
 public class AuthActivity extends AppCompatActivity {
 
@@ -23,7 +32,10 @@ public class AuthActivity extends AppCompatActivity {
         buttonAuth.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                authSuccess();
+                //authSuccess();
+                EditText login = (EditText) findViewById(R.id.authLogin);
+                EditText password = (EditText) findViewById(R.id.authPassword);
+                auth(login.getText().toString(), password.getText().toString());
             }
         });
 
@@ -34,6 +46,63 @@ public class AuthActivity extends AppCompatActivity {
                 register();
             }
         });
+    }
+
+    private void auth(String login, String password) {
+        if (login.isEmpty() || password.isEmpty()) {
+            Toast toast = Toast.makeText(getApplicationContext(),
+                    NPF.Server.API.Respond.Errors.Auth.InvalidInput.MESSAGE, Toast.LENGTH_SHORT);
+            toast.show();
+            return;
+        }
+
+        ApiManager apiManager = new ApiManager(this, new OnTaskCompleted() {
+            @Override
+            public void onCompleted(String res) {
+                try {
+                    JSONObject resJson = new JSONObject(res);
+                    int status = resJson.getInt("status");
+                    if (status == NPF.Server.API.Respond.OK) {
+                        //JSONObject data = resJson.getJSONObject("data");
+                        //String sessionToken = data.getString("session_token");
+                        authSuccess();
+                        return;
+                    }
+
+                    int errorNum = resJson.getInt("error_num");
+
+                    String msg;
+
+                    switch (errorNum) {
+                        case NPF.Server.API.Respond.Errors.NoNetworkConnection.CODE:
+                            msg = NPF.Server.API.Respond.Errors.NoNetworkConnection.MESSAGE;
+                            break;
+
+                        case NPF.Server.API.Respond.Errors.AccessDenied.CODE:
+                            msg = NPF.Server.API.Respond.Errors.AccessDenied.MESSAGE;
+                            break;
+
+                        case NPF.Server.API.Respond.Errors.SqlError.CODE:
+                            msg = NPF.Server.API.Respond.Errors.SqlError.MESSAGE;
+                            break;
+
+                        case NPF.Server.API.Respond.Errors.Auth.InvalidInput.CODE:
+                            msg = NPF.Server.API.Respond.Errors.Auth.InvalidInput.MESSAGE;
+                            break;
+
+                        default:
+                            msg = "Неизвестная ошибка";
+                            break;
+
+                    }
+                    Toast toast = Toast.makeText(getApplicationContext(),
+                            msg, Toast.LENGTH_SHORT);
+                    toast.show();
+                } catch (JSONException ignored) {}
+            }
+        });
+        apiManager.setMsgAuth(login, password);
+        apiManager.execute(null, null);
     }
 
     private void authSuccess() {

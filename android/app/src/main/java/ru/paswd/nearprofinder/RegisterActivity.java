@@ -7,11 +7,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import ru.paswd.nearprofinder.api.ApiManager;
+import ru.paswd.nearprofinder.api.OnTaskCompleted;
+import ru.paswd.nearprofinder.config.NPF;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -69,7 +72,7 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
-        API api = new API(this, new OnTaskCompleted() {
+        ApiManager apiManager = new ApiManager(this, new OnTaskCompleted() {
             @Override
             public void onCompleted(String res) {
                 try {
@@ -88,24 +91,24 @@ public class RegisterActivity extends AppCompatActivity {
                     String msg;
 
                     switch (errorNum) {
-                        case NPF.Server.API.Respond.Errors.NO_NETWORK_CONNECTION:
-                            msg = "Интернет-соединение отсутствует";
+                        case NPF.Server.API.Respond.Errors.NoNetworkConnection.CODE:
+                            msg = NPF.Server.API.Respond.Errors.NoNetworkConnection.MESSAGE;
                             break;
 
-                        case NPF.Server.API.Respond.Errors.ACCESS_DENIED:
-                            msg = "Доступ запрещён";
+                        case NPF.Server.API.Respond.Errors.AccessDenied.CODE:
+                            msg = NPF.Server.API.Respond.Errors.AccessDenied.MESSAGE;
                             break;
 
-                        case NPF.Server.API.Respond.Errors.MYSQL_ERROR:
-                            msg = "Ошибка базы данных";
+                        case NPF.Server.API.Respond.Errors.SqlError.CODE:
+                            msg = NPF.Server.API.Respond.Errors.SqlError.MESSAGE;
                             break;
 
-                        case NPF.Server.API.Respond.Errors.Reg.FIELDS_EMPTY:
-                            msg = "Некоторые поля не заполнены";
+                        case NPF.Server.API.Respond.Errors.FieldsEmpty.CODE:
+                            msg = NPF.Server.API.Respond.Errors.FieldsEmpty.MESSAGE;
                             break;
 
-                        case NPF.Server.API.Respond.Errors.Reg.USER_EXSISTS:
-                            msg = "Пользователь с указанным логином уже зарегистрирован";
+                        case NPF.Server.API.Respond.Errors.Reg.UserExists.CODE:
+                            msg = NPF.Server.API.Respond.Errors.Reg.UserExists.MESSAGE;
                             break;
 
                         default:
@@ -119,8 +122,8 @@ public class RegisterActivity extends AppCompatActivity {
                 } catch (JSONException ignored) {}
             }
         });
-        api.setMsgRegister(login, password, email);
-        api.execute(null, null);
+        apiManager.setMsgRegister(login, password, email);
+        apiManager.execute(null, null);
 
 
     }

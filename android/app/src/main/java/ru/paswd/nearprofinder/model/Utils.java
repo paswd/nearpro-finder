@@ -1,4 +1,6 @@
-package ru.paswd.nearprofinder;
+package ru.paswd.nearprofinder.model;
+
+import ru.paswd.nearprofinder.config.NPF;
 
 public class Utils {
     public static String setPriceConvenientFormat(long price) {

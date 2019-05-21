@@ -14,6 +14,8 @@ import android.widget.Spinner;
 
 import java.util.ArrayList;
 
+import ru.paswd.nearprofinder.config.NPF;
+
 public class FilterFragment extends Fragment {
     private BottomNavigationView nav;
     private View view;

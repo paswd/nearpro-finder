@@ -13,7 +13,8 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import java.util.ArrayList;
-import java.util.Objects;
+
+import ru.paswd.nearprofinder.config.NPF;
 
 public class PropertyListFragment extends Fragment {
     private Context context;

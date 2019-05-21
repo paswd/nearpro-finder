@@ -1,4 +1,4 @@
-package ru.paswd.nearprofinder;
+package ru.paswd.nearprofinder.model;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -7,6 +7,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+
+import ru.paswd.nearprofinder.config.NPF;
 
 public class GeoData {
     private HashMap<String, Marker> pointsList;

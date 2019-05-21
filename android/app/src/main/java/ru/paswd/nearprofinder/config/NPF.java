@@ -1,4 +1,4 @@
-package ru.paswd.nearprofinder;
+package ru.paswd.nearprofinder.config;
 
 public class NPF {
     public static final class Fragment {
@@ -77,22 +77,47 @@ public class NPF {
                 public static final int ERROR = 0;
 
                 public static final class Errors {
-                    public static final int NO_NETWORK_CONNECTION = -1;
-                    public static final int ACCESS_DENIED = 1;
-                    public static final int MYSQL_ERROR = 2;
+                    public static final class NoNetworkConnection {
+                        public static final int CODE = -1;
+                        public static final String MESSAGE = "Интернет-соединение отсутствует";
+                    }
+                    public static final class AccessDenied {
+                        public static final int CODE = 1;
+                        public static final String MESSAGE = "Доступ запрещён";
+                    }
+                    public static final class SqlError {
+                        public static final int CODE = 2;
+                        public static final String MESSAGE = "Ошибка базы данных";
+                    }
+
+                    public static final class FieldsEmpty {
+                        public static final int CODE = 3;
+                        public static final String MESSAGE = "Некоторые поля не заполнены";
+                    }
 
                     public static final class Reg {
-                        public static final int FIELDS_EMPTY = 3;
-                        public static final int USER_EXSISTS = 4;
+                        public static final class UserExists {
+                            public static final int CODE = 4;
+                            public static final String MESSAGE = "Пользователь с указанным логином уже зарегистрирован";
+                        }
                     }
 
                     public static final class Auth {
-                        public static final int INVALID_INPUT = 5;
-                        public static final int INVALID_SESSION = 6;
+                        public static final class InvalidInput {
+                            public static final int CODE = 5;
+                            public static final String MESSAGE = "Неправильный логин или пароль";
+                        }
+                        public static final class InvalidSession {
+                            public static final int CODE = 6;
+                            public static final String MESSAGE = "Сессия завершена";
+                        }
                     }
 
                     public static final class Edit {
-                        public static final int INVALID_OLD_PASSWORD = 7;
+                        public static final class InvalidOldPassword {
+                            public static final int CODE = 7;
+                            public static final String MESSAGE = "Старый пароль указан неверно";
+                        }
                     }
                 }
             }

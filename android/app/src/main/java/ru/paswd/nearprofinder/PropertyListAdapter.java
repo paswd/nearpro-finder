@@ -1,15 +1,15 @@
 package ru.paswd.nearprofinder;
 
 import android.content.Context;
-import android.media.Image;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+
+import ru.paswd.nearprofinder.model.Utils;
 
 public class PropertyListAdapter extends BaseAdapter {
     Context context;
