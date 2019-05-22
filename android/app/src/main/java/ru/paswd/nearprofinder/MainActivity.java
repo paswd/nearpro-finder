@@ -36,7 +36,6 @@ public class MainActivity extends AppCompatActivity {
     private BottomNavigationView navigation;
 
     private Session session;
-
     private Timer mTimer;
     private AppTimerTask appTimerTask;
 
@@ -211,10 +210,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-//        if (!session.isValidSession()) {
-//
-//
-//        }
 
         if (mTimer != null) {
             mTimer.cancel();
@@ -228,6 +223,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+
         if (mTimer != null) {
             mTimer.cancel();
             mTimer = null;
@@ -236,7 +232,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void switchToAuthActivity() {
         Toast toast = Toast.makeText(getApplicationContext(),
-                "Время сессии истекло", Toast.LENGTH_SHORT);
+                NPF.Session.Messages.SESSION_INVALID, Toast.LENGTH_SHORT);
         toast.show();
         startActivity(new Intent(this, AuthActivity.class));
         finish();

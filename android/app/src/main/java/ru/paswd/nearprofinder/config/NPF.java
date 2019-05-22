@@ -48,6 +48,12 @@ public class NPF {
         public static final int INCORRECT_DATA = 4;
     }
 
+    public static final class Session {
+        public static final class Messages {
+            public static final String SESSION_INVALID = "Время сессии истекло";
+        }
+    }
+
     public static final class Server {
         public static final String HOST = "http://nearpro.paswd.ru";
         public static final String ACCESS_TOKEN = "AC2C50DE84A36DDC91EA425CE3EBFACEA481F29D";
