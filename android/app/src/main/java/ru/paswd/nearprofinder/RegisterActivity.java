@@ -13,6 +13,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import ru.paswd.nearprofinder.api.ApiManager;
+import ru.paswd.nearprofinder.api.ApiRequest;
+import ru.paswd.nearprofinder.api.OnJSONRequestBuilder;
 import ru.paswd.nearprofinder.api.OnTaskCompleted;
 import ru.paswd.nearprofinder.config.NPF;
 
@@ -58,7 +60,8 @@ public class RegisterActivity extends AppCompatActivity {
         finish();
     }
 
-    private void register(String login, String password, String passwordConfirm, String email) {
+    private void register(final String login, final String password,
+                          final String passwordConfirm, final String email) {
         if (!password.equals(passwordConfirm)) {
             Toast toast = Toast.makeText(getApplicationContext(),
                     "Пароли не совпадают", Toast.LENGTH_SHORT);
@@ -72,7 +75,23 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
-        ApiManager apiManager = new ApiManager(this, new OnTaskCompleted() {
+        ApiManager apiManager = new ApiManager(this, new OnJSONRequestBuilder() {
+            @Override
+            public ApiRequest onCreate() {
+                try {
+                    String apiHref = NPF.Server.API.REGISTER;
+                    JSONObject sendObject = new JSONObject();
+                    sendObject.put("access_token", NPF.Server.ACCESS_TOKEN);
+                    sendObject.put("login", login);
+                    sendObject.put("password", password);
+                    sendObject.put("email", email);
+
+                    return new ApiRequest(sendObject, apiHref, false);
+                } catch (JSONException ignored) {}
+
+                return new ApiRequest(null, null, true);
+            }
+        }, new OnTaskCompleted() {
             @Override
             public void onCompleted(String res) {
                 try {
@@ -119,10 +138,12 @@ public class RegisterActivity extends AppCompatActivity {
                     Toast toast = Toast.makeText(getApplicationContext(),
                             msg, Toast.LENGTH_SHORT);
                     toast.show();
-                } catch (JSONException ignored) {}
+                } catch (JSONException ignored) {
+                }
             }
         });
-        apiManager.setMsgRegister(login, password, email);
+
+        //apiManager.setMsgRegister(login, password, email);
         apiManager.execute(null, null);
 
 

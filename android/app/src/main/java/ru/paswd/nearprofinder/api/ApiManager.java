@@ -23,42 +23,44 @@ public class ApiManager extends AsyncTask<String, String, String> {
     private JSONObject sendObject;
     //private JSONObject result;
     private OnTaskCompleted listener;
+    private OnJSONRequestBuilder requestBuilder;
 
     boolean isError;
 
-    public ApiManager(Context ctx, OnTaskCompleted _listener) {
+    public ApiManager(Context ctx, OnJSONRequestBuilder _requestBuilder, OnTaskCompleted _listener) {
         context = ctx;
         listener = _listener;
+        requestBuilder = _requestBuilder;
         isError = false;
         //apiHref = _apiHref;
         //jsonObject = request;
     }
 
-    public void setMsgRegister(String login, String password, String email) {
-        try {
-            apiHref = NPF.Server.API.REGISTER;
-            sendObject = new JSONObject();
-            sendObject.put("access_token", NPF.Server.ACCESS_TOKEN);
-            sendObject.put("login", login);
-            sendObject.put("password", password);
-            sendObject.put("email", email);
-        } catch (JSONException ignored) {
-            isError = true;
-        }
-
-    }
-
-    public void setMsgAuth(String login, String password) {
-        try {
-            apiHref = NPF.Server.API.AUTH;
-            sendObject = new JSONObject();
-            sendObject.put("access_token", NPF.Server.ACCESS_TOKEN);
-            sendObject.put("login", login);
-            sendObject.put("password", password);
-        } catch (JSONException ignored) {
-            isError = true;
-        }
-    }
+//    public void setMsgRegister(String login, String password, String email) {
+//        try {
+//            apiHref = NPF.Server.API.REGISTER;
+//            sendObject = new JSONObject();
+//            sendObject.put("access_token", NPF.Server.ACCESS_TOKEN);
+//            sendObject.put("login", login);
+//            sendObject.put("password", password);
+//            sendObject.put("email", email);
+//        } catch (JSONException ignored) {
+//            isError = true;
+//        }
+//
+//    }
+//
+//    public void setMsgAuth(String login, String password) {
+//        try {
+//            apiHref = NPF.Server.API.AUTH;
+//            sendObject = new JSONObject();
+//            sendObject.put("access_token", NPF.Server.ACCESS_TOKEN);
+//            sendObject.put("login", login);
+//            sendObject.put("password", password);
+//        } catch (JSONException ignored) {
+//            isError = true;
+//        }
+//    }
 
     /*public JSONObject getResult() {
         return result;
@@ -67,10 +69,16 @@ public class ApiManager extends AsyncTask<String, String, String> {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
+        ApiRequest apiRequest = requestBuilder.onCreate();
+        apiHref = apiRequest.getApiHref();
+        sendObject = apiRequest.getSendingData();
+        isError = apiRequest.isError();
+
     }
 
     @Override
     protected void onPostExecute(String res) {
+        super.onPostExecute(res);
         listener.onCompleted(res);
     }
 
@@ -142,7 +150,7 @@ public class ApiManager extends AsyncTask<String, String, String> {
         return null;
     }
 
-    public boolean checkNetworkConnection() {
+    private boolean checkNetworkConnection() {
         ConnectivityManager connMgr = (ConnectivityManager)
                 context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
