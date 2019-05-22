@@ -1,6 +1,9 @@
 package ru.paswd.nearprofinder.config;
 
 public class NPF {
+    public static final class Global {
+        public static final int TIMER_DELAY = 2000;
+    }
     public static final class Fragment {
         public static final int PROPERTY_LIST = 1;
         public static final int FILTER = 2;

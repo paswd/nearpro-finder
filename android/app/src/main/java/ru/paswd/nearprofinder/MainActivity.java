@@ -1,6 +1,7 @@
 package ru.paswd.nearprofinder;
 
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -10,11 +11,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.Timer;
 
 import ru.paswd.nearprofinder.config.NPF;
+import ru.paswd.nearprofinder.model.OnSessionInvalidListener;
+import ru.paswd.nearprofinder.model.Session;
 
 public class MainActivity extends AppCompatActivity {
     //private TextView mTextMessage;
@@ -29,6 +34,11 @@ public class MainActivity extends AppCompatActivity {
     private Deque<Integer> fragmentStatusStack;
 
     private BottomNavigationView navigation;
+
+    private Session session;
+
+    private Timer mTimer;
+    private AppTimerTask appTimerTask;
 
     public Integer removeNull(Integer num) {
         return (num != null ? num : -1);
@@ -169,6 +179,13 @@ public class MainActivity extends AppCompatActivity {
                         .show();
             }
         });
+
+        session = new Session(this, new OnSessionInvalidListener() {
+            @Override
+            public void onInvalid() {
+                switchToAuthActivity();
+            }
+        });
     }
 
     @Override
@@ -189,6 +206,40 @@ public class MainActivity extends AppCompatActivity {
         } else {
             finish();
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+//        if (!session.isValidSession()) {
+//
+//
+//        }
+
+        if (mTimer != null) {
+            mTimer.cancel();
+        }
+
+        mTimer = new Timer();
+        appTimerTask = new AppTimerTask(session);
+        mTimer.schedule(appTimerTask, NPF.Global.TIMER_DELAY, NPF.Global.TIMER_DELAY);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mTimer != null) {
+            mTimer.cancel();
+            mTimer = null;
+        }
+    }
+
+    private void switchToAuthActivity() {
+        Toast toast = Toast.makeText(getApplicationContext(),
+                "Время сессии истекло", Toast.LENGTH_SHORT);
+        toast.show();
+        startActivity(new Intent(this, AuthActivity.class));
+        finish();
     }
 
 }

@@ -18,8 +18,11 @@ import ru.paswd.nearprofinder.api.ApiRequest;
 import ru.paswd.nearprofinder.api.OnJSONRequestBuilder;
 import ru.paswd.nearprofinder.api.OnTaskCompleted;
 import ru.paswd.nearprofinder.config.NPF;
+import ru.paswd.nearprofinder.model.Session;
 
 public class AuthActivity extends AppCompatActivity {
+
+    Session session;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +51,15 @@ public class AuthActivity extends AppCompatActivity {
                 register();
             }
         });
+
+        session = new Session(this, null);
+
+        if (session.isValidSession()) {
+            switchToMainActivity();
+//            Toast toast = Toast.makeText(getApplicationContext(),
+//                    "Сессия продолжена", Toast.LENGTH_SHORT);
+//            toast.show();
+        }
     }
 
     private void auth(final String login, final String password) {
@@ -80,9 +92,9 @@ public class AuthActivity extends AppCompatActivity {
                     JSONObject resJson = new JSONObject(res);
                     int status = resJson.getInt("status");
                     if (status == NPF.Server.API.Respond.OK) {
-                        //JSONObject data = resJson.getJSONObject("data");
-                        //String sessionToken = data.getString("session_token");
-                        authSuccess();
+                        JSONObject data = resJson.getJSONObject("data");
+                        String sessionToken = data.getString("session_token");
+                        authSuccess(sessionToken);
                         return;
                     }
 
@@ -123,7 +135,12 @@ public class AuthActivity extends AppCompatActivity {
         apiManager.execute(null, null);
     }
 
-    private void authSuccess() {
+    private void authSuccess(String sessionToken) {
+        session.create(sessionToken);
+        switchToMainActivity();
+    }
+
+    private void switchToMainActivity() {
         startActivity(new Intent(this, MainActivity.class));
         finish();
     }
