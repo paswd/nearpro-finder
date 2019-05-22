@@ -2,7 +2,9 @@ package ru.paswd.nearprofinder;
 
 import android.app.Fragment;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
@@ -25,6 +27,7 @@ import ru.paswd.nearprofinder.api.ApiRequest;
 import ru.paswd.nearprofinder.api.OnJSONRequestBuilder;
 import ru.paswd.nearprofinder.api.OnTaskCompleted;
 import ru.paswd.nearprofinder.config.NPF;
+import ru.paswd.nearprofinder.model.PropertyFilter;
 import ru.paswd.nearprofinder.model.Session;
 import ru.paswd.nearprofinder.model.StringWithReference;
 import ru.paswd.nearprofinder.model.StringWithTag;
@@ -36,13 +39,45 @@ public class FilterFragment extends Fragment {
     private ArrayList<StringWithTag> countriesList = new ArrayList<>();
     private ArrayList<StringWithReference> regionsList = new ArrayList<>();
     private ArrayList<StringWithTag> selectedRegionsList = new ArrayList<>();
-//    private ArrayList<String> citiesList = new ArrayList<>();
     private ArrayList<StringWithTag> propertyTypesList = new ArrayList<>();
+
+    Spinner countriesSpinner;
+    Spinner regionsSpinner;
+    Spinner propertyTypesSpinner;
+
     private MainActivity activity;
 
     private Session session;
-    String regionsJsonStr = "";
-    String propertyTypesJsonStr = "";
+    private String regionsJsonStr = "";
+    private String propertyTypesJsonStr = "";
+
+    private PropertyFilter propertyFilter;
+
+    private static final String PREF_REGIONS = "filter_regions_list";
+    private static final String PREF_PROPERTY_TYPES = "filter_types_list";
+
+    public void saveRegionsJsonLocal() {
+        SharedPreferences sPref = getPreferences();
+
+        SharedPreferences.Editor editor = sPref.edit();
+        //editor.putString(PREF_NAME, sessionToken);
+        editor.putString(PREF_REGIONS, regionsJsonStr);
+        editor.apply();
+    }
+    public void savePropertyTypesJsonsLocal() {
+        SharedPreferences sPref = getPreferences();
+
+        SharedPreferences.Editor editor = sPref.edit();
+        //editor.putString(PREF_NAME, sessionToken);
+        editor.putString(PREF_PROPERTY_TYPES, propertyTypesJsonStr);
+        editor.apply();
+    }
+    public void loadJsonsLocal() {
+        SharedPreferences sPref = getPreferences();
+        //sessionToken = sPref.getString(PREF_NAME, "");
+        regionsJsonStr = sPref.getString(PREF_REGIONS, "");
+        propertyTypesJsonStr = sPref.getString(PREF_PROPERTY_TYPES, "");
+    }
 
     public void setNavigation(BottomNavigationView navigation) {
         nav = navigation;
@@ -54,10 +89,14 @@ public class FilterFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_filter, null);
+        propertyFilter = new PropertyFilter(getActivity());
+        loadJsonsLocal();
+
         listsFill();
-        //testListsFill();
         initSpinners();
         getDataFromHost();
+        //setPreviousValues();
+
         Button btnPointsList = view.findViewById(R.id.filterPointsList);
         btnPointsList.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -65,6 +104,21 @@ public class FilterFragment extends Fragment {
                 //setViewPointsList();
                 //activity.setViewPointsList(true);
                 startActivity(new Intent(activity, PointsViewActivity.class));
+            }
+        });
+        Button btnSearch = view.findViewById(R.id.filterSearch);
+        btnSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int countrySelectedPos = countriesSpinner.getSelectedItemPosition();
+                int regionSelectedPos = regionsSpinner.getSelectedItemPosition();
+                int propertyTypeSelectedPos = propertyTypesSpinner.getSelectedItemPosition();
+
+                int countrySelectedId = countriesList.get(countrySelectedPos).tag;
+                int regionSelectedId = selectedRegionsList.get(regionSelectedPos).tag;
+                int propertyTypeSelectedId = propertyTypesList.get(propertyTypeSelectedPos).tag;
+
+                propertyFilter.set(countrySelectedId, regionSelectedId, propertyTypeSelectedId, 0, 0);
             }
         });
         //Button buttonExit = (Button) view.findViewById(R.id.)
@@ -94,12 +148,15 @@ public class FilterFragment extends Fragment {
         propertyTypesList.add(new StringWithTag(1, "Жилое помещение"));
         propertyTypesList.add(new StringWithTag(2, "Офис"));
     }
-    private void getListsFromHost() {
 
+    private void listsFill() {
+        session = new Session(getActivity(), null);
+        countriesAndRegionsFill();
+        fillRegions(propertyFilter.getCountry());
+        typesFill();
     }
 
     private void countriesAndRegionsFill() {
-
         try {
             countriesList.clear();
             regionsList.clear();
@@ -129,6 +186,7 @@ public class FilterFragment extends Fragment {
                         regionsList.add(new StringWithReference(regionId, countryId, regionName));
                     }
                 }
+                saveRegionsJsonLocal();
                 //fillRegions(1);
                 return;
             }
@@ -181,6 +239,7 @@ public class FilterFragment extends Fragment {
                     propertyTypesList.add(new StringWithTag(typeId, typeName));
 
                 }
+                savePropertyTypesJsonsLocal();
                 //fillRegions(1);
                 return;
             }
@@ -213,11 +272,11 @@ public class FilterFragment extends Fragment {
         } catch (JSONException ignored) {
         }
     }
-    private void listsFill() {
-        session = new Session(getActivity(), null);
-        countriesAndRegionsFill();
-        fillRegions(0);
-        typesFill();
+
+    private void getDataFromHost() {
+        getCountriesAndRegions();
+        getTypes();
+        //saveJsonsLocal();
     }
 
     private void getCountriesAndRegions() {
@@ -270,11 +329,6 @@ public class FilterFragment extends Fragment {
         //apiManager.setMsgAuth(login, password);
         apiManager.execute(null, null);
     }
-    private void getDataFromHost() {
-        getCountriesAndRegions();
-        //fillRegions(0);
-        getTypes();
-    }
 
     private void fillRegions(int countryId) {
         selectedRegionsList.clear();
@@ -293,20 +347,16 @@ public class FilterFragment extends Fragment {
                 android.R.layout.simple_spinner_dropdown_item, countriesList);
         ArrayAdapter<StringWithTag> regionsAdapter = new ArrayAdapter<>(getActivity(),
                 android.R.layout.simple_spinner_dropdown_item, selectedRegionsList);
-//        ArrayAdapter<String> citiesAdapter = new ArrayAdapter<>(getActivity(),
-//                android.R.layout.simple_spinner_dropdown_item, citiesList);
         ArrayAdapter<StringWithTag> propertyTypesAdapter = new ArrayAdapter<>(getActivity(),
                 android.R.layout.simple_spinner_dropdown_item, propertyTypesList);
 
 
-        Spinner countriesSpinner = (Spinner) view.findViewById(R.id.filterCountry);
-        final Spinner regionsSpinner = (Spinner) view.findViewById(R.id.filterRegion);
-//        Spinner citiesSpinner = (Spinner) view.findViewById(R.id.filterCity);
-        Spinner propertyTypesSpinner = (Spinner) view.findViewById(R.id.filterPropertyType);
+        countriesSpinner = (Spinner) view.findViewById(R.id.filterCountry);
+        regionsSpinner = (Spinner) view.findViewById(R.id.filterRegion);
+        propertyTypesSpinner = (Spinner) view.findViewById(R.id.filterPropertyType);
 
         countriesSpinner.setAdapter(countriesAdapter);
         regionsSpinner.setAdapter(regionsAdapter);
-//        citiesSpinner.citiesSpinnersetAdapter(citiesAdapter);
         propertyTypesSpinner.setAdapter(propertyTypesAdapter);
 
         countriesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -315,6 +365,7 @@ public class FilterFragment extends Fragment {
                 int countryId = countriesList.get(position).tag;
                 regionsSpinner.setSelection(0);
                 fillRegions(countryId);
+                setSelection(regionsSpinner, selectedRegionsList, propertyFilter.getRegion());
             }
 
             @Override
@@ -322,6 +373,26 @@ public class FilterFragment extends Fragment {
                 //fillRegions(0);
             }
         });
-        countriesSpinner.setSelection(0);
+        //countriesSpinner.setSelection(0);
+        //countriesSpinner.setSelection(propertyFilter.);
+        setSelection(countriesSpinner, countriesList, propertyFilter.getCountry());
+        setSelection(propertyTypesSpinner, propertyTypesList, propertyFilter.getType());
+    }
+
+    private void setSelection(Spinner spinner, ArrayList<StringWithTag> list, int id) {
+        int counter = 0;
+        boolean selected = false;
+        for (StringWithTag item : list) {
+            if (item.tag == id) {
+                selected = true;
+                break;
+            }
+            counter++;
+        }
+        spinner.setSelection(selected ? counter : 0);
+    }
+
+    private SharedPreferences getPreferences() {
+        return PreferenceManager.getDefaultSharedPreferences(getActivity());
     }
 }

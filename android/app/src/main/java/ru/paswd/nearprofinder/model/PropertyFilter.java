@@ -25,6 +25,14 @@ public class PropertyFilter {
         loadLocal();
     }
 
+    public void setEmpty() {
+        country = 0;
+        region = 0;
+        type = 0;
+        priceMin = 0;
+        priceMax = 0;
+    }
+
     public void set(int _country, int _region, int _type, int _priceMin, int _priceMax) {
         country = _country;
         region = _region;
