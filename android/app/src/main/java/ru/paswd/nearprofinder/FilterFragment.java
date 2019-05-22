@@ -42,6 +42,7 @@ public class FilterFragment extends Fragment {
 
     private Session session;
     String regionsJsonStr = "";
+    String propertyTypesJsonStr = "";
 
     public void setNavigation(BottomNavigationView navigation) {
         nav = navigation;
@@ -96,30 +97,7 @@ public class FilterFragment extends Fragment {
     private void getListsFromHost() {
 
     }
-    private void getCountriesAndRegions() {
-        ApiManager apiManager = new ApiManager(getActivity(), new OnJSONRequestBuilder() {
-            @Override
-            public ApiRequest onCreate() {
-                try {
-                    String apiHref = NPF.Server.API.GET_REGIONS;
-                    JSONObject sendObject = new JSONObject();
-                    sendObject.put("access_token", NPF.Server.ACCESS_TOKEN);
-                    sendObject.put("session_token", session.getToken());
-                    return new ApiRequest(sendObject, apiHref, false);
-                } catch (JSONException ignored) {}
 
-                return new ApiRequest(null, null, true);
-            }
-        }, new OnTaskCompleted() {
-            @Override
-            public void onCompleted(String res) {
-                regionsJsonStr = res;
-                countriesAndRegionsFill();
-            }
-        });
-        //apiManager.setMsgAuth(login, password);
-        apiManager.execute(null, null);
-    }
     private void countriesAndRegionsFill() {
 
         try {
@@ -183,20 +161,118 @@ public class FilterFragment extends Fragment {
         } catch (JSONException ignored) {
         }
     }
-    private void getTypes() {
+    private void typesFill() {
+        try {
+            propertyTypesList.clear();
+            propertyTypesList.add(new StringWithTag(0, "-Не выбрано-"));
 
+            if (propertyTypesJsonStr.isEmpty()) {
+                return;
+            }
+
+            JSONObject resJson = new JSONObject(propertyTypesJsonStr);
+            int status = resJson.getInt("status");
+            if (status == NPF.Server.API.Respond.OK) {
+                JSONArray dataJson = resJson.getJSONArray("data");
+                for (int i = 0; i < dataJson.length(); i++) {
+                    JSONObject currType = dataJson.getJSONObject(i);
+                    int typeId = currType.getInt("id");
+                    String typeName = currType.getString("name");
+                    propertyTypesList.add(new StringWithTag(typeId, typeName));
+
+                }
+                //fillRegions(1);
+                return;
+            }
+
+            int errorNum = resJson.getInt("error_num");
+
+            String msg;
+
+            switch (errorNum) {
+                case NPF.Server.API.Respond.Errors.NoNetworkConnection.CODE:
+                    msg = NPF.Server.API.Respond.Errors.NoNetworkConnection.MESSAGE;
+                    break;
+
+                case NPF.Server.API.Respond.Errors.AccessDenied.CODE:
+                    msg = NPF.Server.API.Respond.Errors.AccessDenied.MESSAGE;
+                    break;
+
+                case NPF.Server.API.Respond.Errors.SqlError.CODE:
+                    msg = NPF.Server.API.Respond.Errors.SqlError.MESSAGE;
+                    break;
+
+                default:
+                    msg = "Неизвестная ошибка";
+                    break;
+
+            }
+            Toast toast = Toast.makeText(getActivity(),
+                    msg, Toast.LENGTH_SHORT);
+            toast.show();
+        } catch (JSONException ignored) {
+        }
+    }
+    private void listsFill() {
+        session = new Session(getActivity(), null);
+        countriesAndRegionsFill();
+        fillRegions(0);
+        typesFill();
+    }
+
+    private void getCountriesAndRegions() {
+        ApiManager apiManager = new ApiManager(getActivity(), new OnJSONRequestBuilder() {
+            @Override
+            public ApiRequest onCreate() {
+                try {
+                    String apiHref = NPF.Server.API.GET_REGIONS;
+                    JSONObject sendObject = new JSONObject();
+                    sendObject.put("access_token", NPF.Server.ACCESS_TOKEN);
+                    sendObject.put("session_token", session.getToken());
+                    return new ApiRequest(sendObject, apiHref, false);
+                } catch (JSONException ignored) {}
+
+                return new ApiRequest(null, null, true);
+            }
+        }, new OnTaskCompleted() {
+            @Override
+            public void onCompleted(String res) {
+                regionsJsonStr = res;
+                //countriesAndRegionsFill();
+                listsFill();
+            }
+        });
+        //apiManager.setMsgAuth(login, password);
+        apiManager.execute(null, null);
+    }
+    private void getTypes() {
+        ApiManager apiManager = new ApiManager(getActivity(), new OnJSONRequestBuilder() {
+            @Override
+            public ApiRequest onCreate() {
+                try {
+                    String apiHref = NPF.Server.API.GET_PROPERTY_TYPES;
+                    JSONObject sendObject = new JSONObject();
+                    sendObject.put("access_token", NPF.Server.ACCESS_TOKEN);
+                    sendObject.put("session_token", session.getToken());
+                    return new ApiRequest(sendObject, apiHref, false);
+                } catch (JSONException ignored) {}
+
+                return new ApiRequest(null, null, true);
+            }
+        }, new OnTaskCompleted() {
+            @Override
+            public void onCompleted(String res) {
+                propertyTypesJsonStr = res;
+                //countriesAndRegionsFill();
+                typesFill();
+            }
+        });
+        //apiManager.setMsgAuth(login, password);
+        apiManager.execute(null, null);
     }
     private void getDataFromHost() {
         getCountriesAndRegions();
         //fillRegions(0);
-        getTypes();
-    }
-    private void listsFill() {
-        session = new Session(getActivity(), null);
-        //getCountriesAndRegions();
-        countriesAndRegionsFill();
-        fillRegions(0);
-        //testListsFill();
         getTypes();
     }
 
