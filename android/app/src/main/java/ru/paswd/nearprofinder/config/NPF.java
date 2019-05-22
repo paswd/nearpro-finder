@@ -80,6 +80,8 @@ public class NPF {
                     "register.php";
             public static final String REGISTER_FOLLOWING = HOST + API_PATH +
                     "register_following.php";
+            public static final String GET_USER = HOST + API_PATH +
+                    "get_user.php";
 
             public static final class Respond {
                 public static final int OK = 1;

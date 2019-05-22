@@ -243,4 +243,12 @@ class User {
 		$this->db->query('UPDATE `users` SET `password`="'.$encrypted.'" WHERE `name`="'.$this->login.'"');
 		$this->password = $enctypted;
 	}
+
+	function get() {
+		$data = [
+			'login' => $this->login,
+			'email' => $this->email
+		];
+		return $data;
+	}
 }

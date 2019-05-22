@@ -9,6 +9,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -65,6 +67,71 @@ public class SettingsFragment extends Fragment {
                 getActivity().finish();
             }
         });
+
+        final TextView viewLogin = (TextView) view.findViewById(R.id.settingsShowLogin);
+        final TextView viewEmail = (TextView) view.findViewById(R.id.settingsShowEmail);
+
+        ApiManager apiManager = new ApiManager(getActivity(), new OnJSONRequestBuilder() {
+            @Override
+            public ApiRequest onCreate() {
+                try {
+                    String apiHref = NPF.Server.API.GET_USER;
+                    JSONObject sendObject = new JSONObject();
+                    sendObject.put("access_token", NPF.Server.ACCESS_TOKEN);
+                    sendObject.put("session_token", session.getToken());
+
+                    return new ApiRequest(sendObject, apiHref, false);
+                } catch (JSONException ignored) {}
+
+                return new ApiRequest(null, null, true);
+            }
+        }, new OnTaskCompleted() {
+            @Override
+            public void onCompleted(String res) {
+                try {
+                    JSONObject resJson = new JSONObject(res);
+                    int status = resJson.getInt("status");
+                    if (status == NPF.Server.API.Respond.OK) {
+                        JSONObject data = resJson.getJSONObject("data");
+                        String login = data.getString("login");
+                        String email = data.getString("email");
+
+                        viewLogin.setText(login);
+                        viewEmail.setText(email);
+                        return;
+                    }
+
+                    int errorNum = resJson.getInt("error_num");
+
+                    String msg;
+
+                    switch (errorNum) {
+                        case NPF.Server.API.Respond.Errors.NoNetworkConnection.CODE:
+                            msg = NPF.Server.API.Respond.Errors.NoNetworkConnection.MESSAGE;
+                            break;
+
+                        case NPF.Server.API.Respond.Errors.AccessDenied.CODE:
+                            msg = NPF.Server.API.Respond.Errors.AccessDenied.MESSAGE;
+                            break;
+
+                        case NPF.Server.API.Respond.Errors.SqlError.CODE:
+                            msg = NPF.Server.API.Respond.Errors.SqlError.MESSAGE;
+                            break;
+
+                        default:
+                            msg = "Неизвестная ошибка";
+                            break;
+
+                    }
+                    Toast toast = Toast.makeText(getActivity(),
+                            msg, Toast.LENGTH_SHORT);
+                    toast.show();
+                } catch (JSONException ignored) {
+                }
+            }
+        });
+        apiManager.execute(null, null);
+
         return view;
     }
 

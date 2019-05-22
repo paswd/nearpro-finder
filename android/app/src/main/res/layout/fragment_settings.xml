@@ -12,6 +12,30 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:layout_margin="10dp">
+            
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Логин" />
+
+            <TextView
+                android:id="@+id/settingsShowLogin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:textSize="20dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="E-mail" />
+
+            <TextView
+                android:id="@+id/settingsShowEmail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:textSize="20dp"/>
 
             <Button
                 android:id="@+id/buttonExit"
