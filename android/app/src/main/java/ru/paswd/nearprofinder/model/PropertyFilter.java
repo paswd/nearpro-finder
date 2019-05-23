@@ -11,6 +11,7 @@ public class PropertyFilter {
     private static final String PREF_TYPE = PREFERENCES_PREFIX + "type";
     private static final String PREF_PRICE_MIN = PREFERENCES_PREFIX + "price_min";
     private static final String PREF_PRICE_MAX = PREFERENCES_PREFIX + "price_max";
+    private static final String PREF_RADIUS = PREFERENCES_PREFIX + "radius";
 
     private Context context;
 
@@ -19,6 +20,7 @@ public class PropertyFilter {
     private int type;
     private int priceMin;
     private int priceMax;
+    private int radius;
 
     public PropertyFilter(Context ctx) {
         context = ctx;
@@ -33,12 +35,13 @@ public class PropertyFilter {
         priceMax = 0;
     }
 
-    public void set(int _country, int _region, int _type, int _priceMin, int _priceMax) {
+    public void set(int _country, int _region, int _type, int _priceMin, int _priceMax, int _radius) {
         country = _country;
         region = _region;
         type = _type;
         priceMin = _priceMin;
         priceMax = _priceMax;
+        radius = _radius;
 
         saveLocal();
     }
@@ -51,6 +54,7 @@ public class PropertyFilter {
         type = sPref.getInt(PREF_TYPE, 0);
         priceMin = sPref.getInt(PREF_PRICE_MIN, 0);
         priceMax = sPref.getInt(PREF_PRICE_MAX, 0);
+        radius = sPref.getInt(PREF_RADIUS, 0);
 
     }
 
@@ -64,6 +68,7 @@ public class PropertyFilter {
         editor.putInt(PREF_TYPE, type);
         editor.putInt(PREF_PRICE_MIN, priceMin);
         editor.putInt(PREF_PRICE_MAX, priceMax);
+        editor.putInt(PREF_RADIUS, radius);
         editor.apply();
     }
 
@@ -86,6 +91,9 @@ public class PropertyFilter {
     public int getPriceMax() {
         return priceMax;
     }
+    public int getRadius() {
+        return radius;
+    }
 
     public void setCountry(int country) {
         this.country = country;
@@ -105,5 +113,9 @@ public class PropertyFilter {
 
     public void setPriceMax(int priceMax) {
         this.priceMax = priceMax;
+    }
+
+    public void setRadius(int radius) {
+        this.radius = radius;
     }
 }

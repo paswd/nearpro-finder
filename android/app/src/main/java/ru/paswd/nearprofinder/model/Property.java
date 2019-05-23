@@ -80,7 +80,10 @@ public class Property {
                         sendObject.put("lat", optimalPoint.latitude);
                         sendObject.put("lng", optimalPoint.longitude);
                         //todo radius
-                        sendObject.put("radius", 5000.);
+
+                        if (filter.getRadius() > 0) {
+                            sendObject.put("radius", filter.getRadius());
+                        }
                     }
                     if (filter.getCountry() > 0) {
                         sendObject.put("country", filter.getCountry());

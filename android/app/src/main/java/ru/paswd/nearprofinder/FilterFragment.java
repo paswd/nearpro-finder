@@ -22,6 +22,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import ru.paswd.nearprofinder.api.ApiManager;
 import ru.paswd.nearprofinder.api.ApiRequest;
@@ -37,10 +38,10 @@ public class FilterFragment extends Fragment {
     private BottomNavigationView nav;
     private View view;
 
-    private ArrayList<StringWithTag> countriesList = new ArrayList<>();
-    private ArrayList<StringWithReference> regionsList = new ArrayList<>();
-    private ArrayList<StringWithTag> selectedRegionsList = new ArrayList<>();
-    private ArrayList<StringWithTag> propertyTypesList = new ArrayList<>();
+    private List<StringWithTag> countriesList = new ArrayList<>();
+    private List<StringWithReference> regionsList = new ArrayList<>();
+    private List<StringWithTag> selectedRegionsList = new ArrayList<>();
+    private List<StringWithTag> propertyTypesList = new ArrayList<>();
 
     Spinner countriesSpinner;
     Spinner regionsSpinner;
@@ -86,12 +87,12 @@ public class FilterFragment extends Fragment {
 
     public void setActivity(MainActivity act) { activity = act; }
 
-    private String getPriceStr(int price) {
+    private String getNumStr(int price) {
         return price > 0
                 ? Integer.toString(price)
                 : "";
     }
-    private int setPriceFromStr(String price) {
+    private int setNumFromStr(String price) {
         return !price.isEmpty()
                 ? Integer.valueOf(price)
                 : 0;
@@ -112,8 +113,11 @@ public class FilterFragment extends Fragment {
 
         EditText priceMinView = view.findViewById(R.id.filterPriceMin);
         EditText priceMaxView = view.findViewById(R.id.filterPriceMax);
-        priceMinView.setText(getPriceStr(propertyFilter.getPriceMin()));
-        priceMaxView.setText(getPriceStr(propertyFilter.getPriceMax()));
+        EditText radiusView = view.findViewById(R.id.filterRadius);
+
+        priceMinView.setText(getNumStr(propertyFilter.getPriceMin()));
+        priceMaxView.setText(getNumStr(propertyFilter.getPriceMax()));
+        radiusView.setText(getNumStr(propertyFilter.getRadius()));
 
         Button btnPointsList = view.findViewById(R.id.filterPointsList);
         btnPointsList.setOnClickListener(new View.OnClickListener() {
@@ -143,13 +147,18 @@ public class FilterFragment extends Fragment {
                         .findViewById(R.id.filterPriceMax))
                         .getText()
                         .toString();
+                String radiusStr = ((EditText) view
+                        .findViewById(R.id.filterRadius))
+                        .getText()
+                        .toString();
 
-                int priceMin = setPriceFromStr(priceMinStr);
-                int priceMax = setPriceFromStr(priceMaxStr);
+                int priceMin = setNumFromStr(priceMinStr);
+                int priceMax = setNumFromStr(priceMaxStr);
+                int radius = setNumFromStr(radiusStr);
 
 
                 propertyFilter.set(countrySelectedId, regionSelectedId, propertyTypeSelectedId,
-                        priceMin, priceMax);
+                        priceMin, priceMax, radius);
 
                 Toast toast = Toast.makeText(getActivity(),
                         "Фильтры были успешно применены", Toast.LENGTH_SHORT);
@@ -414,7 +423,7 @@ public class FilterFragment extends Fragment {
         setSelection(propertyTypesSpinner, propertyTypesList, propertyFilter.getType());
     }
 
-    private void setSelection(Spinner spinner, ArrayList<StringWithTag> list, int id) {
+    private void setSelection(Spinner spinner, List<StringWithTag> list, int id) {
         int counter = 0;
         boolean selected = false;
         for (StringWithTag item : list) {
