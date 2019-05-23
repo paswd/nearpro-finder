@@ -23,4 +23,7 @@ public class Utils {
         }
         return result.toString();
     }
+    public static long getCurrentUnixTimestamp() {
+        return System.currentTimeMillis() / 1000L;
+    }
 }

@@ -38,6 +38,8 @@ import java.util.Timer;
 
 import ru.paswd.nearprofinder.config.NPF;
 import ru.paswd.nearprofinder.model.GeoData;
+import ru.paswd.nearprofinder.model.GeoPoints;
+import ru.paswd.nearprofinder.model.MarkerLocal;
 import ru.paswd.nearprofinder.model.OnSessionInvalidListener;
 import ru.paswd.nearprofinder.model.Session;
 
@@ -46,8 +48,9 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
     final Context context = this;
     private GoogleMap mMap;
     //private HashMap<String, Marker> pointsList;
-    private DBHelper dbHelper;
-    private GeoData geoData;
+//    private DBHelper dbHelper;
+//    private GeoData geoData;
+    private GeoPoints geoPoints;
     private Marker optimalPoint = null;
 
     //For testing
@@ -59,33 +62,34 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
     private Timer mTimer;
     private AppTimerTask appTimerTask;
 
-    class DBHelper extends SQLiteOpenHelper {
-        public DBHelper(Context context) {
-            // конструктор суперкласса
-            super(context, NPF.DB.NAME, null, 1);
-        }
-
-        @Override
-        public void onCreate(SQLiteDatabase db) {
-            db.execSQL("CREATE TABLE " + NPF.DB.TABLE_POINTS_LIST + " (" +
-                    "name text primary key," +
-                    "lat real," +
-                    "lng real," +
-                    "updated integer," +
-                    "synchronized integer," +
-                    "deleted integer);");
-        }
-
-        @Override
-        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
-        }
-    }
+//    class DBHelper extends SQLiteOpenHelper {
+//        public DBHelper(Context context) {
+//            // конструктор суперкласса
+//            super(context, NPF.DB.NAME, null, 1);
+//        }
+//
+//        @Override
+//        public void onCreate(SQLiteDatabase db) {
+//            db.execSQL("CREATE TABLE " + NPF.DB.TABLE_POINTS_LIST + " (" +
+//                    "name text primary key," +
+//                    "lat real," +
+//                    "lng real," +
+//                    "updated integer," +
+//                    "synchronized integer," +
+//                    "deleted integer);");
+//        }
+//
+//        @Override
+//        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+//
+//        }
+//    }
 
     private Marker addPointLocal(LatLng latLng, String title) {
         Marker addedMarker = mMap.addMarker(new MarkerOptions().position(latLng).title(title));
         //pointsList.put(addedMarker.getTitle(), addedMarker);
-        geoData.addPoint(addedMarker);
+        //geoPoints.getGeoData().addPoint(addedMarker);
+        geoPoints.addLocal(addedMarker);
         return addedMarker;
     }
 
@@ -98,74 +102,78 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
 
     private void addPoint(LatLng latLng, String title) {
         Marker addedMarker = addPointLocal(latLng, title);
+        geoPoints.add(addedMarker, latLng, title);
 
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-        db.delete(NPF.DB.TABLE_POINTS_LIST, "name = ?",
-                new String[] { addedMarker.getTitle() });
-
-        ContentValues cv = new ContentValues();
-        cv.put("name", addedMarker.getTitle());
-        cv.put("lat", latLng.latitude);
-        cv.put("lng", latLng.longitude);
-        cv.put("updated", getCurrentUnixTimestamp());
-        cv.put("synchronized", 0);
-        cv.put("deleted", 0);
-        db.insert(NPF.DB.TABLE_POINTS_LIST, null, cv);
-
-        //For testing
-        /*secondMarker = firstMarker;
-        firstMarker = addedMarker;
-        addedCnt++;
-        printCurrentDistance();*/
-
+//        SQLiteDatabase db = dbHelper.getWritableDatabase();
+//        db.delete(NPF.DB.TABLE_POINTS_LIST, "name = ?",
+//                new String[] { addedMarker.getTitle() });
+//
+//        ContentValues cv = new ContentValues();
+//        cv.put("name", addedMarker.getTitle());
+//        cv.put("lat", latLng.latitude);
+//        cv.put("lng", latLng.longitude);
+//        cv.put("updated", getCurrentUnixTimestamp());
+//        cv.put("synchronized", 0);
+//        cv.put("deleted", 0);
+//        db.insert(NPF.DB.TABLE_POINTS_LIST, null, cv);
+//
+//        //For testing
+//        /*secondMarker = firstMarker;
+//        firstMarker = addedMarker;
+//        addedCnt++;
+//        printCurrentDistance();*/
+//
         refreshOptimalPoint();
 
         updatePointStorage();
     }
 
     private void renamePoint(Marker marker, String newTitle) {
-        String prevTitle = marker.getTitle();
-        /*pointsList.remove(prevTitle);
-        marker.setTitle(newTitle);
-        pointsList.put(marker.getTitle(), marker);*/
-        geoData.renamePoint(marker, newTitle);
-        marker.showInfoWindow();
-
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-        db.delete(NPF.DB.TABLE_POINTS_LIST, "name = ?",
-                new String[] { marker.getTitle() });
-
-        ContentValues cv = new ContentValues();
-        cv.put("name", marker.getTitle());
-        cv.put("updated", getCurrentUnixTimestamp());
-
-        db.update(NPF.DB.TABLE_POINTS_LIST, cv, "name = ?", new String[] { prevTitle });
-
+        geoPoints.rename(marker, newTitle);
+//        String prevTitle = marker.getTitle();
+//        /*pointsList.remove(prevTitle);
+//        marker.setTitle(newTitle);
+//        pointsList.put(marker.getTitle(), marker);*/
+//        geoData.renamePoint(marker, newTitle);
+//        marker.showInfoWindow();
+//
+//        SQLiteDatabase db = dbHelper.getWritableDatabase();
+//        db.delete(NPF.DB.TABLE_POINTS_LIST, "name = ?",
+//                new String[] { marker.getTitle() });
+//
+//        ContentValues cv = new ContentValues();
+//        cv.put("name", marker.getTitle());
+//        cv.put("updated", getCurrentUnixTimestamp());
+//
+//        db.update(NPF.DB.TABLE_POINTS_LIST, cv, "name = ?", new String[] { prevTitle });
+//
         updatePointStorage();
     }
 
     private void removePoint(Marker marker) {
+        geoPoints.remove(marker);
         //pointsList.remove(marker.getTitle());
-        geoData.removePoint(marker);
-        ContentValues cv = new ContentValues();
-        cv.put("deleted", 1);
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-        db.update(NPF.DB.TABLE_POINTS_LIST, cv, "name = ?",
-                new String[] { marker.getTitle() });
-        marker.remove();
+//        geoData.removePoint(marker);
+//        ContentValues cv = new ContentValues();
+//        cv.put("deleted", 1);
+//        SQLiteDatabase db = dbHelper.getWritableDatabase();
+//        db.update(NPF.DB.TABLE_POINTS_LIST, cv, "name = ?",
+//                new String[] { marker.getTitle() });
+//        marker.remove();
         refreshOptimalPoint();
         updatePointStorage();
     }
 
     private void clearAllPoints() {
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-        db.delete(NPF.DB.TABLE_POINTS_LIST, null, null);
-
-        for (Marker i : geoData.getPointsValues()) {
-            i.remove();
-        }
-        //pointsList.clear();
-        geoData.clearAllPoints();
+        geoPoints.clear();
+//        SQLiteDatabase db = dbHelper.getWritableDatabase();
+//        db.delete(NPF.DB.TABLE_POINTS_LIST, null, null);
+//
+//        for (Marker i : geoData.getPointsValues()) {
+//            i.remove();
+//        }
+//        //pointsList.clear();
+//        geoData.clearAllPoints();
         refreshOptimalPoint();
     }
 
@@ -174,74 +182,79 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
     }
 
     private void importPointsListFromStorage() {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        Cursor cr = db.query(NPF.DB.TABLE_POINTS_LIST, new String[] {"name", "lat", "lng"},
-                "deleted = 0", null, null, null,null);
-        if (cr.moveToFirst()) {
-            int colLat = cr.getColumnIndex("lat");
-            int colLng = cr.getColumnIndex("lng");
-            int colName = cr.getColumnIndex("name");
+//        SQLiteDatabase db = dbHelper.getReadableDatabase();
+//        Cursor cr = db.query(NPF.DB.TABLE_POINTS_LIST, new String[] {"name", "lat", "lng"},
+//                "deleted = 0", null, null, null,null);
+//        if (cr.moveToFirst()) {
+//            int colLat = cr.getColumnIndex("lat");
+//            int colLng = cr.getColumnIndex("lng");
+//            int colName = cr.getColumnIndex("name");
+//
+//            do {
+//                double lat = cr.getDouble(colLat);
+//                double lng = cr.getDouble(colLng);
+//                String title = cr.getString(colName);
+//
+//                addPointLocal(new LatLng(lat, lng), title);
+//            } while (cr.moveToNext());
+//        }
+//        cr.close();
+        List<MarkerLocal> markerLocalList = geoPoints.importPointsListFromStorage();
 
-            do {
-                double lat = cr.getDouble(colLat);
-                double lng = cr.getDouble(colLng);
-                String title = cr.getString(colName);
-
-                addPointLocal(new LatLng(lat, lng), title);
-            } while (cr.moveToNext());
-        }
-        cr.close();
-    }
-
-    private String makeNotNull(String str) {
-        return (str != null ? str : "");
-    }
-
-    private String convertAddressListToUnit(ArrayList<String> addresses) {
-        StringBuilder res = new StringBuilder();
-
-        boolean first = true;
-        for (String i : addresses) {
-            if (i.isEmpty()) {
-                continue;
-            }
-            if (!first) {
-                res.append(", ");
-            }
-            first = false;
-            res.append(i);
-        }
-
-        return res.toString();
-    }
-
-
-    private String getAddress(LatLng latLng) {
-        try {
-            Geocoder geo = new Geocoder(this, Locale.getDefault());
-            List<Address> addresses = geo.getFromLocation(latLng.latitude, latLng.longitude, 1);
-            String res = "";
-
-            if (!addresses.isEmpty()) {
-                ArrayList<String> addressesList = new ArrayList<>();
-                //addressesList.add(makeNotNull(addresses.get(0).getAddressLine(0))); // Адрес
-
-                addressesList.add(makeNotNull(addresses.get(0).getThoroughfare())); // Улица
-                addressesList.add(makeNotNull(addresses.get(0).getFeatureName())); // Дом, корпус
-                addressesList.add(makeNotNull(addresses.get(0).getLocality())); // Город
-                addressesList.add(makeNotNull(addresses.get(0).getCountryName())); // Страна
-                addressesList.add(makeNotNull(addresses.get(0).getPostalCode())); // Индекс
-                /*res = addresses.get(0).getFeatureName() + ", " + addresses.get(0).getLocality() + ", " +
-                        addresses.get(0).getAdminArea() + ", " + addresses.get(0).getCountryName();*/
-                res = convertAddressListToUnit(addressesList);
-            }
-            return res;
-        }
-        catch (Exception e) {
-            e.printStackTrace(); // getFromLocation() may sometimes fail
-            return "ERROR: " + e.toString();
+        for (MarkerLocal item : markerLocalList) {
+            addPointLocal(item.getLatLng(), item.getTitle());
         }
     }
+
+//    private String makeNotNull(String str) {
+//        return (str != null ? str : "");
+//    }
+
+//    private String convertAddressListToUnit(ArrayList<String> addresses) {
+//        StringBuilder res = new StringBuilder();
+//
+//        boolean first = true;
+//        for (String i : addresses) {
+//            if (i.isEmpty()) {
+//                continue;
+//            }
+//            if (!first) {
+//                res.append(", ");
+//            }
+//            first = false;
+//            res.append(i);
+//        }
+//
+//        return res.toString();
+//    }
+//
+//
+//    private String getAddress(LatLng latLng) {
+//        try {
+//            Geocoder geo = new Geocoder(this, Locale.getDefault());
+//            List<Address> addresses = geo.getFromLocation(latLng.latitude, latLng.longitude, 1);
+//            String res = "";
+//
+//            if (!addresses.isEmpty()) {
+//                ArrayList<String> addressesList = new ArrayList<>();
+//                //addressesList.add(makeNotNull(addresses.get(0).getAddressLine(0))); // Адрес
+//
+//                addressesList.add(makeNotNull(addresses.get(0).getThoroughfare())); // Улица
+//                addressesList.add(makeNotNull(addresses.get(0).getFeatureName())); // Дом, корпус
+//                addressesList.add(makeNotNull(addresses.get(0).getLocality())); // Город
+//                addressesList.add(makeNotNull(addresses.get(0).getCountryName())); // Страна
+//                addressesList.add(makeNotNull(addresses.get(0).getPostalCode())); // Индекс
+//                /*res = addresses.get(0).getFeatureName() + ", " + addresses.get(0).getLocality() + ", " +
+//                        addresses.get(0).getAdminArea() + ", " + addresses.get(0).getCountryName();*/
+//                res = convertAddressListToUnit(addressesList);
+//            }
+//            return res;
+//        }
+//        catch (Exception e) {
+//            e.printStackTrace(); // getFromLocation() may sometimes fail
+//            return "ERROR: " + e.toString();
+//        }
+//    }
 
     private void updatePointStorage() {
         //showInfoAlert("Update storage", "Storage Updated");
@@ -261,8 +274,9 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         //pointsList = new HashMap<>();
-        dbHelper = new DBHelper(this);
-        geoData = new GeoData();
+//        dbHelper = new DBHelper(this);
+//        geoData = new GeoData();
+        geoPoints = new GeoPoints(context);
         //importPointsListFromStorage();
 
         session = new Session(this, new OnSessionInvalidListener() {
@@ -441,7 +455,8 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
                     }
                 }
                 //if (pointsList.containsKey(pointTitle)) {
-                if (geoData.isPointExists(pointTitle)) {
+//                if (geoData.isPointExists(pointTitle)) {
+                if (geoPoints.isExists(pointTitle)) {
                     showInfoAlert("Отказано", "Точка с таким названием существует");
                             /*Button btn = dlg.getButton(DialogInterface.BUTTON_POSITIVE);
                             if (btn != null) {
@@ -507,7 +522,7 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
                 AlertDialog.Builder builder = new AlertDialog.Builder(context);
                 builder.setTitle("Точка \"" + marker.getTitle() + "\"");
                 String msg = "";
-                msg += getAddress(marker.getPosition()) + "\n\n";
+                msg += geoPoints.getAddress(marker.getPosition()) + "\n\n";
                 msg += "Lat:\t\t" + Double.toString(marker.getPosition().latitude) + "\n";
                 msg += "Lng:\t" + Double.toString(marker.getPosition().longitude) + "\n";
                 builder.setMessage(msg);
@@ -562,7 +577,7 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
                 onBackPressed();
                 return true;
             case R.id.action_points_clear:
-                if (geoData.isPointsListEmpty()) {
+                if (geoPoints.isEmpty()) {
                     showInfoAlert("Очистка карты", "Карта уже была очищена, или на неё не было установлено ни одной точки");
                 } else {
                     showMapClearAlert();
@@ -585,10 +600,10 @@ public class PointsViewActivity extends AppCompatActivity implements OnMapReadyC
 
     private void refreshOptimalPoint() {
         removeOptimalPoint();
-        if (geoData.getPointCount() >= 2) {
-            LatLng pnt = geoData.getOptimalPoint();
+        LatLng optimal = geoPoints.refreshOptimalPoint();
+        if (optimal != null) {
             optimalPoint = mMap.addMarker(new MarkerOptions()
-                    .position(pnt).title("Optimal")
+                    .position(optimal).title("Optimal")
                     .icon(BitmapDescriptorFactory.defaultMarker(228)));
             //showInfoAlert("Optimal pos");
         }

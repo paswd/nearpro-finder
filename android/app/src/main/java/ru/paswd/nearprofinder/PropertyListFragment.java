@@ -3,7 +3,9 @@ package ru.paswd.nearprofinder;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
@@ -78,12 +80,13 @@ public class PropertyListFragment extends Fragment {
     void testFillPropertyList() {
         propertyItems.clear();
         for (int i = 0; i < 11; i++) {
-            propertyItems.add(new PropertyItem("Объект " + i, "Описание", "Адрес", 100000 * i));
+            propertyItems.add(new PropertyItem(i,"Объект " + i, "Описание", "Адрес", 100000 * i));
         }
     }
 
-    /*void fillPropertyList() {
+    void fillPropertyList() {
         propertyItems.clear();
 
-    }*/
+
+    }
 }
