@@ -201,6 +201,10 @@ public class GeoPoints {
         return null;
     }
     public LatLng getOptimalPoint() {
+        if (geoData == null) {
+            return null;
+        }
+        optimalPoint = geoData.getOptimalPoint();
         return optimalPoint;
     }
 

@@ -130,6 +130,13 @@ public class NPF {
                             public static final String MESSAGE = "Старый пароль указан неверно";
                         }
                     }
+
+                    public static final class Data {
+                        public static final class NotExista {
+                            public static final int CODE = 8;
+                            public static final String MESSAGE = "Сущности с таким идентификатором не существует";
+                        }
+                    }
                 }
             }
         }

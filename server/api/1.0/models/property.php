@@ -155,7 +155,7 @@ class Property {
 		$res = $this->db->query('SELECT * FROM `property`'.$join.$where);
 
 		if (mysqli_num_rows($res) == 0)  {
-			return [];
+			die(getRespond(false, 8, $this->errorList[8], NULL));
 		}
 
 		$row = mysqli_fetch_object($res);

@@ -17,5 +17,6 @@ $ERROR_LIST = [
 	4 => 'REG: User already exists',
 	5 => 'AUTH: Invalid login or password',
 	6 => 'AUTH: Invalid session',
-	7 => 'EDIT: Invalid old password'
+	7 => 'EDIT: Invalid old password',
+	8 => 'DATA: Not exists'
 ];

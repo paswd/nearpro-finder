@@ -1,13 +1,14 @@
 package ru.paswd.nearprofinder;
 
 public class PropertyItem {
-    int id;
+    int Id;
     String Title;
     String Desctiption;
     String Address;
     long Price;
 
-    PropertyItem(int id, String title, String desctiption, String address, long price) {
+    public PropertyItem(int id, String title, String desctiption, String address, long price) {
+        Id = id;
         Title = title;
         Desctiption = desctiption;
         Address = address;

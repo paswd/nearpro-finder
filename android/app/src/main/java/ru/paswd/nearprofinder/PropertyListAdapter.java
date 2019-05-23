@@ -8,15 +8,16 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import ru.paswd.nearprofinder.model.Utils;
 
 public class PropertyListAdapter extends BaseAdapter {
     Context context;
     LayoutInflater layoutInflater;
-    ArrayList<PropertyItem> objects;
+    List<PropertyItem> objects;
 
-    PropertyListAdapter(Context ctx, ArrayList<PropertyItem> items) {
+    PropertyListAdapter(Context ctx, List<PropertyItem> items) {
         context = ctx;
         objects = items;
         layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);

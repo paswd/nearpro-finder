@@ -15,16 +15,21 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import ru.paswd.nearprofinder.config.NPF;
+import ru.paswd.nearprofinder.model.OnPropertyUpdateListener;
+import ru.paswd.nearprofinder.model.Property;
 
 public class PropertyListFragment extends Fragment {
     private Context context;
-    private ArrayList<PropertyItem> propertyItems = new ArrayList<>();
+    private List<PropertyItem> propertyItems;
     private PropertyListAdapter adapter;
     private View view;
     private BottomNavigationView navigation;
     private MainActivity activity;
+
+    private Property property;
 
     private BottomNavigationView nav;
 
@@ -43,9 +48,11 @@ public class PropertyListFragment extends Fragment {
                              Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         view = inflater.inflate(R.layout.fragment_property_list, null);
-        testFillPropertyList();
+        propertyItems = new ArrayList<>();
+        //testFillPropertyList();
+        //fillPropertyList();
         adapter = new PropertyListAdapter(context, propertyItems);
-        ListView propertyListView = (ListView) view.findViewById(R.id.propertyListView);
+        final ListView propertyListView = (ListView) view.findViewById(R.id.propertyListView);
         propertyListView.setAdapter(adapter);
 
         propertyListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -53,6 +60,14 @@ public class PropertyListFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 //activity.setViewPropertyItem(true);
                 startActivity(new Intent(context, PropertyItemActivity.class));
+            }
+        });
+
+        property = new Property(context, new OnPropertyUpdateListener() {
+            @Override
+            public void onUpdate(List<PropertyItem> list) {
+                propertyItems = list;
+                propertyListView.setAdapter(new PropertyListAdapter(context, propertyItems));
             }
         });
 
@@ -75,6 +90,7 @@ public class PropertyListFragment extends Fragment {
         getActivity().setTitle(getResources().getString(R.string.title_property_list));
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowHomeEnabled(false);
+        property.update();
     }
 
     void testFillPropertyList() {
@@ -82,11 +98,5 @@ public class PropertyListFragment extends Fragment {
         for (int i = 0; i < 11; i++) {
             propertyItems.add(new PropertyItem(i,"Объект " + i, "Описание", "Адрес", 100000 * i));
         }
-    }
-
-    void fillPropertyList() {
-        propertyItems.clear();
-
-
     }
 }

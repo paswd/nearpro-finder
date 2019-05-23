@@ -77,6 +77,17 @@ public class GeoData {
     private int calculateOptimalPoint() {
         LatLng currPoint = pointsList.entrySet().iterator().next().getValue().getPosition();
 
+        if (pointsList.size() == 0) {
+            optimalPoint = null;
+            isDataChanged = false;
+            return NPF.MethodResult.CORRECT;
+        }
+        if (pointsList.size() == 1) {
+            optimalPoint = currPoint;
+            isDataChanged = false;
+            return NPF.MethodResult.CORRECT;
+        }
+
         while (true) {
             double currStepLat = NPF.Geo.Optimization.DEGREE_STEP_BASIC;
             double currStepLng = NPF.Geo.Optimization.DEGREE_STEP_BASIC;

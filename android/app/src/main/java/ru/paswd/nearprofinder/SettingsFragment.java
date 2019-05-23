@@ -85,7 +85,7 @@ public class SettingsFragment extends Fragment {
                             login = "";
                             email = "";
                             saveLocal();
-                            
+
                             return new ApiRequest(sendObject, apiHref, false);
                         } catch (JSONException ignored) {}
 
