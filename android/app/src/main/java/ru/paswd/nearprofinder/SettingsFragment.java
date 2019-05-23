@@ -2,7 +2,9 @@ package ru.paswd.nearprofinder;
 
 import android.app.Fragment;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
@@ -27,8 +29,38 @@ public class SettingsFragment extends Fragment {
     private View view;
     private Session session;
 
+    private String login = "";
+    private String email = "";
+
+    private static final String PREF_LOGIN = "settings_login";
+    private static final String PREF_EMAIL = "settings_email";
+
     public void setNavigation(BottomNavigationView navigation) {
         nav = navigation;
+    }
+
+    private void saveLocal() {
+        SharedPreferences sPref = getPreferences();
+
+        SharedPreferences.Editor editor = sPref.edit();
+        //editor.putString(PREF_NAME, sessionToken);
+        editor.putString(PREF_LOGIN, login);
+        editor.putString(PREF_EMAIL, email);
+        editor.apply();
+    }
+    private void loadLocal() {
+        SharedPreferences sPref = getPreferences();
+        //sessionToken = sPref.getString(PREF_NAME, "");
+        login = sPref.getString(PREF_LOGIN, "");
+        email = sPref.getString(PREF_EMAIL, "");
+
+        TextView viewLogin = (TextView) view.findViewById(R.id.settingsShowLogin);
+        TextView viewEmail = (TextView) view.findViewById(R.id.settingsShowEmail);
+        viewLogin.setText(login);
+        viewEmail.setText(email);
+    }
+    private SharedPreferences getPreferences() {
+        return PreferenceManager.getDefaultSharedPreferences(getActivity());
     }
 
     @Override
@@ -36,6 +68,7 @@ public class SettingsFragment extends Fragment {
                              Bundle savedInstanceState) {
         session = new Session(getActivity(), null);
         view = inflater.inflate(R.layout.fragment_settings, null);
+        loadLocal();
         Button buttonExit = view.findViewById(R.id.buttonExit);
         buttonExit.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -49,6 +82,10 @@ public class SettingsFragment extends Fragment {
                             sendObject.put("access_token", NPF.Server.ACCESS_TOKEN);
                             sendObject.put("session_token", session.getToken());
 
+                            login = "";
+                            email = "";
+                            saveLocal();
+                            
                             return new ApiRequest(sendObject, apiHref, false);
                         } catch (JSONException ignored) {}
 
@@ -93,11 +130,12 @@ public class SettingsFragment extends Fragment {
                     int status = resJson.getInt("status");
                     if (status == NPF.Server.API.Respond.OK) {
                         JSONObject data = resJson.getJSONObject("data");
-                        String login = data.getString("login");
-                        String email = data.getString("email");
+                        login = data.getString("login");
+                        email = data.getString("email");
 
                         viewLogin.setText(login);
                         viewEmail.setText(email);
+                        saveLocal();
                         return;
                     }
 
