@@ -127,9 +127,10 @@ class Property {
 				'img_src' => $this->globalParams['property_img_dir'].$row->img_src,
 				'lat' => $row->lat,
 				'lng' => $row->lng,
+				'country' => $row->country_id,
 				'region' => $row->region,
 				'address' => $row->address,
-				'description' => $row->description,
+				'description' => $row->description
 			];
 			if ($isLocality) {
 				$data['distance'] = $row->distance;
@@ -143,5 +144,33 @@ class Property {
 		//$this->db->close();
 
 		return $list;
+	}
+	function getById($id) {
+		$this->db->connect();
+		//$res = $this->db->query('SELECT * FROM `property_types`');
+
+		$join = ' INNER JOIN (SELECT `id` AS `region_id`, `country_id` FROM `regions`) AS `regions_list` ON `property`.`region` = `regions_list`.`region_id`';
+		$where = ' WHERE `id` = '.$id;
+		//die('SELECT * FROM `property`'.$join.$where);
+		$res = $this->db->query('SELECT * FROM `property`'.$join.$where);
+
+		if (mysqli_num_rows($res) == 0)  {
+			return [];
+		}
+
+		$row = mysqli_fetch_object($res);
+		return [
+				'id' => $row->id,
+				'name' => $row->name,
+				'price' => $row->price,
+				'type' => $row->type,
+				'img_src' => $this->globalParams['property_img_dir'].$row->img_src,
+				'lat' => $row->lat,
+				'lng' => $row->lng,
+				'country' => $row->country_id,
+				'region' => $row->region,
+				'address' => $row->address,
+				'description' => $row->description
+			];
 	}
 }

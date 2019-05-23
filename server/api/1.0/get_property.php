@@ -16,6 +16,15 @@ $user = new User;
 $user->setAccessToken($token);
 //die(getRespond(true, "", ""));
 
+$id = $received['id'];
+settype($id, 'integer');
+
+$property = new Property;
+
+if (!empty($id)) {
+	die(getRespond(true, 0, '', $property->getById($id)));
+}
+
 $isLocality = ($received['is_locality'] == '1' ? true : false);
 $lat = $received['lat'];
 $lng = $received['lng'];
@@ -36,8 +45,6 @@ settype($priceMax, 'double');
 settype($lat, 'double');
 settype($lng, 'double');
 settype($radius, 'double');
-
-$property = new Property;
 
 $propertyData = $property->get($country, $region, $type, $priceMin, $priceMax,
 	$isLocality, $lat, $lng, $radius);
