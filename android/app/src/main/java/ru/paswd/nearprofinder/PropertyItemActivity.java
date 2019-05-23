@@ -1,19 +1,29 @@
 package ru.paswd.nearprofinder;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.List;
 import java.util.Timer;
 
+import ru.paswd.nearprofinder.api.ApiManager;
+import ru.paswd.nearprofinder.api.ApiRequest;
+import ru.paswd.nearprofinder.api.OnJSONRequestBuilder;
+import ru.paswd.nearprofinder.api.OnTaskCompleted;
 import ru.paswd.nearprofinder.config.NPF;
 import ru.paswd.nearprofinder.model.DownloadImageTask;
 import ru.paswd.nearprofinder.model.GeoData;
@@ -90,6 +100,36 @@ public class PropertyItemActivity extends AppCompatActivity {
                 .setText(description);
 
         ((TextView) findViewById(R.id.propertyItemPointsDistance)).setText(getDistances());
+        Button goBtn = findViewById(R.id.propertyItemGoToHref);
+        goBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        ApiManager apiManager = new ApiManager(getApplication(), new OnJSONRequestBuilder() {
+                            @Override
+                            public ApiRequest onCreate() {
+                                try {
+                                    String apiHref = NPF.Server.API.REGISTER_FOLLOWING;
+                                    JSONObject sendObject = new JSONObject();
+                                    sendObject.put("access_token", NPF.Server.ACCESS_TOKEN);
+                                    sendObject.put("session_token", session.getToken());
+                                    sendObject.put("property_id", id);
+                                    return new ApiRequest(sendObject, apiHref, false);
+                                } catch (JSONException ignored) {}
+
+                                return new ApiRequest(null, null, true);
+                            }
+                        }, new OnTaskCompleted() {
+                            @Override
+                            public void onCompleted(String res) {
+
+                            }
+                        });
+                        apiManager.execute(null, null);
+                        Intent browserIntent = new
+                                Intent(Intent.ACTION_VIEW, Uri.parse(href));
+                        startActivity(browserIntent);
+                    }
+                });
     }
 
     private String getDistances() {
