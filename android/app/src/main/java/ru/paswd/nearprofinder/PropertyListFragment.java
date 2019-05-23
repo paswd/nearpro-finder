@@ -93,10 +93,10 @@ public class PropertyListFragment extends Fragment {
         property.update();
     }
 
-    void testFillPropertyList() {
-        propertyItems.clear();
-        for (int i = 0; i < 11; i++) {
-            propertyItems.add(new PropertyItem(i,"Объект " + i, "Описание", "Адрес", 100000 * i));
-        }
-    }
+//    void testFillPropertyList() {
+//        propertyItems.clear();
+//        for (int i = 0; i < 11; i++) {
+//            propertyItems.add(new PropertyItem(i,"Объект " + i, "Описание", "Адрес", 100000 * i));
+//        }
+//    }
 }

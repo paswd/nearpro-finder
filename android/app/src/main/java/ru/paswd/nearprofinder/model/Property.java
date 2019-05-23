@@ -124,7 +124,8 @@ public class Property {
                     int price = item.getInt("price");
                     String address = item.getString("address");
                     String desc = item.getString("description");
-                    res.add(new PropertyItem(id, name, desc, address, price));
+                    String imageSrc = item.getString("img_src");
+                    res.add(new PropertyItem(id, name, desc, address, price, imageSrc));
                 }
                 //saveLocal();
                 return res;

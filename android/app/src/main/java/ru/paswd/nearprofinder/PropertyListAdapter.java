@@ -5,11 +5,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import ru.paswd.nearprofinder.config.NPF;
+import ru.paswd.nearprofinder.model.DownloadImageTask;
 import ru.paswd.nearprofinder.model.Utils;
 
 public class PropertyListAdapter extends BaseAdapter {
@@ -46,7 +49,9 @@ public class PropertyListAdapter extends BaseAdapter {
         }
 
         PropertyItem item = (PropertyItem) getItem(position);
-
+        ImageView icon = view.findViewById(R.id.itemPropertyListViewImage);
+        DownloadImageTask downloadImageTask = new DownloadImageTask(icon);
+        downloadImageTask.execute(NPF.Server.HOST + item.ImageSrc);
         ((TextView) view.findViewById(R.id.itemPropertyListViewTitle)).setText(item.Title);
         ((TextView) view.findViewById(R.id.itemPropertyListViewAddress)).setText(item.Address);
         ((TextView) view.findViewById(R.id.itemPropertyListViewPrice)).setText(Utils.setPriceConvenientFormat(item.Price) + " \u20BD");
