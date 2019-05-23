@@ -5,19 +5,42 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.model.LatLng;
+
+import java.util.List;
 import java.util.Timer;
 
 import ru.paswd.nearprofinder.config.NPF;
+import ru.paswd.nearprofinder.model.DownloadImageTask;
+import ru.paswd.nearprofinder.model.GeoData;
+import ru.paswd.nearprofinder.model.GeoPoints;
+import ru.paswd.nearprofinder.model.MarkerLocal;
 import ru.paswd.nearprofinder.model.OnSessionInvalidListener;
 import ru.paswd.nearprofinder.model.Session;
+import ru.paswd.nearprofinder.model.Utils;
 
 public class PropertyItemActivity extends AppCompatActivity {
 
     private Session session;
     private Timer mTimer;
     private AppTimerTask appTimerTask;
+
+    private int id;
+    private String name;
+    private int price;
+    private String imgSrc;
+    private double lat;
+    private double lng;
+    private String address;
+    private String href;
+    private String description;
+
+    private GeoPoints geoPoints;
+    private List<MarkerLocal> pointsList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,7 +49,18 @@ public class PropertyItemActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        setTitle("Объект");
+        Intent intent = getIntent();
+
+        id = intent.getIntExtra("id", 0);
+        name = intent.getStringExtra("name");
+        price = intent.getIntExtra("price", 0);
+        imgSrc = intent.getStringExtra("imgSrc");
+        lat = intent.getDoubleExtra("lat", 0.);
+        lng = intent.getDoubleExtra("lng", 0.);
+        address = intent.getStringExtra("address");
+        href = intent.getStringExtra("href");
+        description = intent.getStringExtra("description");
+
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
@@ -36,6 +70,44 @@ public class PropertyItemActivity extends AppCompatActivity {
                 switchToAuthActivity();
             }
         });
+        geoPoints = new GeoPoints(this);
+        pointsList = geoPoints.importPointsListFromStorage();
+
+        fillView();
+    }
+    private void fillView() {
+        ImageView icon = findViewById(R.id.propertyItemImage);
+        DownloadImageTask downloadImageTask = new DownloadImageTask(icon);
+        downloadImageTask.execute(NPF.Server.HOST + imgSrc);
+
+        setTitle(name);
+
+        ((TextView) findViewById(R.id.propertyItemPrice))
+                .setText(Utils.setPriceConvenientFormat(price) + " \u20BD");
+        ((TextView) findViewById(R.id.propertyItemAddress))
+                .setText(address);
+        ((TextView) findViewById(R.id.propertyItemDescription))
+                .setText(description);
+
+        ((TextView) findViewById(R.id.propertyItemPointsDistance)).setText(getDistances());
+    }
+
+    private String getDistances() {
+        String distances = "";
+
+        LatLng curr = new LatLng(lat, lng);
+
+        boolean isFirst = true;
+        for (MarkerLocal item : pointsList) {
+            if (!isFirst) {
+                distances += "\n";
+            }
+            isFirst = false;
+            double distance = GeoData.getDistance(item.getLatLng(), curr) / 1000;
+            distances += "* " + item.getTitle() + " - " + Utils.round(distance, 2) + " км";
+        }
+
+        return distances;
     }
 
     @Override

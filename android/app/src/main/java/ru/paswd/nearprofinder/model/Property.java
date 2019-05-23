@@ -32,6 +32,8 @@ public class Property {
     private OnPropertyUpdateListener listener;
     private Session session;
 
+    private List<MarkerLocal> pointsList;
+
     private static final String PREF_PROPERTY_LIST = "property_list";
 
     public Property(Context ctx, OnPropertyUpdateListener _listener) {
@@ -40,6 +42,7 @@ public class Property {
         listener = _listener;
         session = new Session(context, null);
         geoPoints = new GeoPoints(context);
+        pointsList = geoPoints.importPointsListFromStorage();
         loadLocal();
     }
 
@@ -53,6 +56,7 @@ public class Property {
     public void loadLocal() {
         SharedPreferences sPref = getPreferences();
         propertyListJsonStr = sPref.getString(PREF_PROPERTY_LIST, "");
+        listener.onUpdate(getListFromJSON());
     }
 
     private SharedPreferences getPreferences() {
@@ -125,7 +129,10 @@ public class Property {
                     String address = item.getString("address");
                     String desc = item.getString("description");
                     String imageSrc = item.getString("img_src");
-                    res.add(new PropertyItem(id, name, desc, address, price, imageSrc));
+                    double lat = item.getDouble("lat");
+                    double lng = item.getDouble("lng");
+                    String href = item.getString("href");
+                    res.add(new PropertyItem(id, name, price, imageSrc, lat, lng, address, href, desc));
                 }
                 //saveLocal();
                 return res;
@@ -159,5 +166,9 @@ public class Property {
         } catch (JSONException ignored) {}
 
         return res;
+    }
+
+    List<MarkerLocal> getPointsList() {
+        return pointsList;
     }
 }

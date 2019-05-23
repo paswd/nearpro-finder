@@ -11,14 +11,18 @@ import java.util.Map;
 import ru.paswd.nearprofinder.config.NPF;
 
 public class GeoData {
-    private HashMap<String, Marker> pointsList;
+    private HashMap<String, Marker> markerList;
+    private HashMap<String, LatLng> pointsList;
     private LatLng optimalPoint;
     private boolean isDataChanged;
+    private boolean isMarker;
 
     public GeoData() {
         pointsList = new HashMap<>();
+        markerList = new HashMap<>();
         optimalPoint = new LatLng(0., 0.);
         isDataChanged = false;
+        isMarker = true;
     }
 
     public static double getDistance(Marker mrk1, Marker mrk2) {
@@ -46,7 +50,7 @@ public class GeoData {
         double denominator = Math.sin(lat1) * Math.sin(lat2) +
                 Math.cos(lat1) * Math.cos(lat2) * Math.cos(lngDiff);
 
-        double angularDiff = Math.atan(numerator / denominator);
+        double angularDiff = Math.abs(Math.atan(numerator / denominator));
 
         return angularDiff * NPF.Geo.EARTH_RADIUS_METERS;
     }
@@ -65,8 +69,8 @@ public class GeoData {
         double summ = 0.;
 
         while (it.hasNext()) {
-            Map.Entry<String, Marker> pair = (Map.Entry) it.next();
-            double currDist = getDistance(curr, pair.getValue().getPosition());
+            Map.Entry<String, LatLng> pair = (Map.Entry) it.next();
+            double currDist = getDistance(curr, pair.getValue());
             summ += Math.pow(currDist, 2.);
         }
 
@@ -75,7 +79,7 @@ public class GeoData {
 
 
     private int calculateOptimalPoint() {
-        LatLng currPoint = pointsList.entrySet().iterator().next().getValue().getPosition();
+        LatLng currPoint = pointsList.entrySet().iterator().next().getValue();
 
         if (pointsList.size() == 0) {
             optimalPoint = null;
@@ -166,13 +170,24 @@ public class GeoData {
 
         return NPF.MethodResult.CORRECT;
     }
+    public int addPoint(String title, LatLng pos) {
+//        if (isPointExists(title)) {
+//            return NPF.MethodResult.EXSISTS;
+//        }
+
+        pointsList.put(title, pos);
+        isDataChanged = true;
+
+        return NPF.MethodResult.CORRECT;
+    }
 
     public int addPoint(Marker marker) {
-        if (isPointExists(marker.getTitle())) {
-            return NPF.MethodResult.EXSISTS;
-        }
+//        if (isPointExists(marker.getTitle())) {
+//            return NPF.MethodResult.EXSISTS;
+//        }
 
-        pointsList.put(marker.getTitle(), marker);
+        pointsList.put(marker.getTitle(), marker.getPosition());
+        markerList.put(marker.getTitle(), marker);
         isDataChanged = true;
 
         return NPF.MethodResult.CORRECT;
@@ -188,8 +203,10 @@ public class GeoData {
 
         String prevTitle = marker.getTitle();
         pointsList.remove(prevTitle);
+        markerList.remove(prevTitle);
         marker.setTitle(newTitle);
-        pointsList.put(marker.getTitle(), marker);
+        pointsList.put(marker.getTitle(), marker.getPosition());
+        markerList.put(marker.getTitle(), marker);
         isDataChanged = true;
 
         return NPF.MethodResult.CORRECT;
@@ -201,6 +218,7 @@ public class GeoData {
         }
 
         pointsList.remove(marker.getTitle());
+        markerList.remove(marker.getTitle());
         isDataChanged = true;
 
         return NPF.MethodResult.CORRECT;
@@ -208,7 +226,11 @@ public class GeoData {
 
     public void clearAllPoints() {
         isDataChanged = true;
+        for (Marker mrk : getPointsValues()) {
+            mrk.remove();
+        }
         pointsList.clear();
+        markerList.clear();
     }
 
     public boolean isPointExists(String title) {
@@ -220,7 +242,7 @@ public class GeoData {
     }
 
     public Collection<Marker> getPointsValues() {
-        return pointsList.values();
+        return markerList.values();
     }
 
     public LatLng getOptimalPoint() {

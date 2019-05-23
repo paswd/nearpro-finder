@@ -39,9 +39,12 @@ public class GeoPoints {
     public void addLocal(Marker marker) {
         geoData.addPoint(marker);
     }
+    public void addLocal(String title, LatLng pos) {
+        geoData.addPoint(title, pos);
+    }
 
     public void add(Marker addedMarker, LatLng latLng, String title) {
-        addLocal(addedMarker);
+                addLocal(addedMarker);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         db.delete(NPF.DB.TABLE_POINTS_LIST, "name = ?",
                 new String[] { addedMarker.getTitle() });
@@ -103,9 +106,9 @@ public class GeoPoints {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         db.delete(NPF.DB.TABLE_POINTS_LIST, null, null);
 
-        for (Marker i : geoData.getPointsValues()) {
-            i.remove();
-        }
+//        for (Marker i : geoData.getPointsValues()) {
+//            i.remove();
+//        }
         //pointsList.clear();
         geoData.clearAllPoints();
         refreshOptimalPoint();
@@ -126,7 +129,7 @@ public class GeoPoints {
                 double lng = cr.getDouble(colLng);
                 String title = cr.getString(colName);
                 res.add(new MarkerLocal(new LatLng(lat, lng), title));
-                //addLocal(new LatLng(lat, lng), title);
+                addLocal(title, new LatLng(lat, lng));
             } while (cr.moveToNext());
         }
         cr.close();

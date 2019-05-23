@@ -59,7 +59,31 @@ public class PropertyListFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 //activity.setViewPropertyItem(true);
-                startActivity(new Intent(context, PropertyItemActivity.class));
+                //String name = propertyItems
+                PropertyItem item = propertyItems.get(position);
+                int propertyId = item.Id;
+                String name = item.Title;
+                int price = item.Price;
+                String imgSrc = item.ImageSrc;
+                double lat = item.Lat;
+                double lng = item.Lng;
+                String address = item.Address;
+                String href = item.Href;
+                String description = item.Description;
+                //startActivity(new Intent(context, PropertyItemActivity.class));
+
+                Intent intent = new Intent(context, PropertyItemActivity.class);
+                intent.putExtra("id", propertyId);
+                intent.putExtra("name", name);
+                intent.putExtra("price", price);
+                intent.putExtra("imgSrc", imgSrc);
+                intent.putExtra("lat", lat);
+                intent.putExtra("lng", lng);
+                intent.putExtra("address", address);
+                intent.putExtra("href", href);
+                intent.putExtra("description", description);
+
+                startActivity(intent);
             }
         });
 

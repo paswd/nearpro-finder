@@ -26,4 +26,9 @@ public class Utils {
     public static long getCurrentUnixTimestamp() {
         return System.currentTimeMillis() / 1000L;
     }
+
+    public static double round(double val, int sign) {
+        double dec = 10 * sign;
+        return Math.round(val * dec) / dec;
+    }
 }

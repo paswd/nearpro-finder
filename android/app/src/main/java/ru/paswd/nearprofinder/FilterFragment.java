@@ -150,6 +150,10 @@ public class FilterFragment extends Fragment {
 
                 propertyFilter.set(countrySelectedId, regionSelectedId, propertyTypeSelectedId,
                         priceMin, priceMax);
+
+                Toast toast = Toast.makeText(getActivity(),
+                        "Фильтры были успешно применены", Toast.LENGTH_SHORT);
+                toast.show();
             }
         });
         //Button buttonExit = (Button) view.findViewById(R.id.)

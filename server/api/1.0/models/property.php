@@ -130,6 +130,7 @@ class Property {
 				'country' => $row->country_id,
 				'region' => $row->region,
 				'address' => $row->address,
+				'href' => $row->href,
 				'description' => $row->description
 			];
 			if ($isLocality) {
@@ -170,6 +171,7 @@ class Property {
 				'country' => $row->country_id,
 				'region' => $row->region,
 				'address' => $row->address,
+				'href' => $row->href,
 				'description' => $row->description
 			];
 	}
