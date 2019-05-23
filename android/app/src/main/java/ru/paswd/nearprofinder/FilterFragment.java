@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -85,17 +86,34 @@ public class FilterFragment extends Fragment {
 
     public void setActivity(MainActivity act) { activity = act; }
 
+    private String getPriceStr(int price) {
+        return price > 0
+                ? Integer.toString(price)
+                : "";
+    }
+    private int setPriceFromStr(String price) {
+        return !price.isEmpty()
+                ? Integer.valueOf(price)
+                : 0;
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_filter, null);
         propertyFilter = new PropertyFilter(getActivity());
-        loadJsonsLocal();
+
+                loadJsonsLocal();
 
         listsFill();
         initSpinners();
         getDataFromHost();
         //setPreviousValues();
+
+        EditText priceMinView = view.findViewById(R.id.filterPriceMin);
+        EditText priceMaxView = view.findViewById(R.id.filterPriceMax);
+        priceMinView.setText(getPriceStr(propertyFilter.getPriceMin()));
+        priceMaxView.setText(getPriceStr(propertyFilter.getPriceMax()));
 
         Button btnPointsList = view.findViewById(R.id.filterPointsList);
         btnPointsList.setOnClickListener(new View.OnClickListener() {
@@ -117,8 +135,21 @@ public class FilterFragment extends Fragment {
                 int countrySelectedId = countriesList.get(countrySelectedPos).tag;
                 int regionSelectedId = selectedRegionsList.get(regionSelectedPos).tag;
                 int propertyTypeSelectedId = propertyTypesList.get(propertyTypeSelectedPos).tag;
+                String priceMinStr = ((EditText) view
+                        .findViewById(R.id.filterPriceMin))
+                        .getText()
+                        .toString();
+                String priceMaxStr = ((EditText) view
+                        .findViewById(R.id.filterPriceMax))
+                        .getText()
+                        .toString();
 
-                propertyFilter.set(countrySelectedId, regionSelectedId, propertyTypeSelectedId, 0, 0);
+                int priceMin = setPriceFromStr(priceMinStr);
+                int priceMax = setPriceFromStr(priceMaxStr);
+
+
+                propertyFilter.set(countrySelectedId, regionSelectedId, propertyTypeSelectedId,
+                        priceMin, priceMax);
             }
         });
         //Button buttonExit = (Button) view.findViewById(R.id.)
